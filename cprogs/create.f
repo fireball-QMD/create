@@ -157,6 +157,8 @@
  
         integer looper2
         integer looper23
+        integer looper24
+        integer looper25
         integer looper3
         integer looper3a
         integer minderiv2c
@@ -1414,6 +1416,166 @@
            end if
           end if
 
+         end if ! MPI which node end if
+        end do
+
+! ======================================================================
+! II. Compute two center cases (Y dipole, X Dipole.
+! ======================================================================
+
+        do itype1 = 1, nspec
+          do itype2 = 1, nspec
+            call mk_indexDipY (itype1, itype2, nspec_max, nsh_max,
+     1              inter_max,nssh, lssh, nleft, lleft, mleft, nright,
+     2              lright, mright, index_max2c, index_max3c)
+          enddo
+        enddo
+
+
+        do looper24 = 1, nspec*nspec
+         if (mod(looper24,nproc) .eq. my_proc) then
+          itmp   = looper24
+          itype2 = 1 + int((itmp - 1)/nspec)
+          itmp   = itmp - (itype2 - 1)*nspec
+          itype1 = itmp
+          write(*,*) 'prueba itype', itype1, itype2
+ 
+          nzx1 = nzx(itype1)
+          nzx2 = nzx(itype2)
+ 
+          rcutoff1 = rcutoffa_max(itype1)
+          rcutoff2 = rcutoffa_max(itype2)
+ 
+          nssh2 = nssh(itype2)
+ 
+          atom1 = atom(itype1)
+          atom2 = atom(itype2)
+ 
+          what1 = what(itype1)
+          what2 = what(itype2)
+ 
+          index_max = index_max2c(itype1,itype2)
+          do index = 1, index_max
+           n1(index) = nleft(itype1,itype2,index)
+           l1(index) = lleft(itype1,itype2,index)
+           m1(index) = mleft(itype1,itype2,index)
+           n2(index) = nright(itype1,itype2,index)
+           l2(index) = lright(itype1,itype2,index)
+           m2(index) = mright(itype1,itype2,index)
+          end do
+
+
+          if (iswitch(9) .eq. 1) then
+
+
+           interaction = 9                         ! y-dipole
+           isorp = 0
+           ideriv = 0
+           ispher = .false.
+
+      write(*,*) 'dip_y type1=', itype1, 'type2=', itype2
+      write(*,*) 'n1=',n1(1),n1(2),n1(3),n1(4),n1(5),n1(6)
+      !write(*,*) 'n1=',n1(7),n1(8),n1(9),n1(10),n1(11)
+      write(*,*) 'l1=',l1(1),l1(2),l1(3),l1(4),l1(5),l1(6)
+      !write(*,*) 'l1=',m1(7),m1(8),m1(9),m1(10),m1(11)
+      write(*,*) 'm1=',m1(1),m1(2),m1(3),m1(4),m1(5),m1(6)
+      !write(*,*) 'm1=',l1(7),l1(8),l1(9),l1(10),l1(11)
+      write(*,*) 'n2=',n2(1),n2(2),n2(3),n2(4),n2(5),n2(6)
+      !write(*,*) 'n2=',n2(7),n2(8),n2(9),n2(10),n2(11)
+      write(*,*) 'l2=',l2(1),l2(2),l2(3),l2(4),l2(5),l2(6)
+      !write(*,*) 'l2=',l2(7),l2(8),l2(9),l2(10),l2(11)
+      write(*,*) 'm2=',m2(1),m2(2),m2(3),m2(4),m2(5),m2(6)
+      !write(*,*) 'm2=',m2(7),m2(8),m2(9),m2(10),m2(11)
+      write(*,*) 'index=',index,'type1=',itype1,'type2=',itype2
+      write(*,*)  'index_max', index_max
+
+
+           call twocenter (interaction, isorp, ideriv, iexc, fraction,
+     1                     itype1, itype2, atom1, atom2, what1, what2,
+     2                     nzx1, nzx2, rcutoff1, rcutoff2, nssh2, nzd,
+     3                     nrhod, nddd, index_max, n1, l1, m1, n2, l2,
+     4                     m2, signature, iammaster, ispher)
+
+          end if
+         end if ! MPI which node end if
+        end do
+
+
+
+        do itype1 = 1, nspec
+          do itype2 = 1, nspec
+            call mk_indexDipX (itype1, itype2, nspec_max, nsh_max,
+     1              inter_max,nssh, lssh, nleft, lleft, mleft, nright,
+     2              lright, mright, index_max2c, index_max3c)
+          enddo
+        enddo
+
+
+        do looper25 = 1, nspec*nspec
+         if (mod(looper25,nproc) .eq. my_proc) then
+          itmp   = looper25
+          itype2 = 1 + int((itmp - 1)/nspec)
+          itmp   = itmp - (itype2 - 1)*nspec
+          itype1 = itmp
+          write(*,*) 'prueba2 itype', itype1, itype2
+ 
+          nzx1 = nzx(itype1)
+          nzx2 = nzx(itype2)
+ 
+          rcutoff1 = rcutoffa_max(itype1)
+          rcutoff2 = rcutoffa_max(itype2)
+ 
+          nssh2 = nssh(itype2)
+ 
+          atom1 = atom(itype1)
+          atom2 = atom(itype2)
+ 
+          what1 = what(itype1)
+          what2 = what(itype2)
+ 
+          index_max = index_max2c(itype1,itype2)
+          do index = 1, index_max
+           n1(index) = nleft(itype1,itype2,index)
+           l1(index) = lleft(itype1,itype2,index)
+           m1(index) = mleft(itype1,itype2,index)
+           n2(index) = nright(itype1,itype2,index)
+           l2(index) = lright(itype1,itype2,index)
+           m2(index) = mright(itype1,itype2,index)
+          end do
+
+
+          if (iswitch(10) .eq. 1) then
+
+
+           interaction = 10                        ! x-dipole
+           isorp = 0
+           ideriv = 0
+           ispher = .false.
+
+      write(*,*) 'dip_x type1=', itype1, 'type2=', itype2
+      write(*,*) 'n1=',n1(1),n1(2),n1(3),n1(4),n1(5),n1(6)
+      !write(*,*) 'n1=',n1(7),n1(8),n1(9),n1(10),n1(11)
+      write(*,*) 'l1=',l1(1),l1(2),l1(3),l1(4),l1(5),l1(6)
+      !write(*,*) 'l1=',m1(7),m1(8),m1(9),m1(10),m1(11)
+      write(*,*) 'm1=',m1(1),m1(2),m1(3),m1(4),m1(5),m1(6)
+      !write(*,*) 'm1=',l1(7),l1(8),l1(9),l1(10),l1(11)
+      write(*,*) 'n2=',n2(1),n2(2),n2(3),n2(4),n2(5),n2(6)
+      !write(*,*) 'n2=',n2(7),n2(8),n2(9),n2(10),n2(11)
+      write(*,*) 'l2=',l2(1),l2(2),l2(3),l2(4),l2(5),l2(6)
+      !write(*,*) 'l2=',l2(7),l2(8),l2(9),l2(10),l2(11)
+      write(*,*) 'm2=',m2(1),m2(2),m2(3),m2(4),m2(5),m2(6)
+      !write(*,*) 'm2=',m2(7),m2(8),m2(9),m2(10),m2(11)
+      write(*,*) 'index=',index,'type1=',itype1,'type2=',itype2
+      write(*,*)  'index_max', index_max
+
+
+           call twocenter (interaction, isorp, ideriv, iexc, fraction,
+     1                     itype1, itype2, atom1, atom2, what1, what2,
+     2                     nzx1, nzx2, rcutoff1, rcutoff2, nssh2, nzd,
+     3                     nrhod, nddd, index_max, n1, l1, m1, n2, l2,
+     4                     m2, signature, iammaster, ispher)
+
+          end if
          end if ! MPI which node end if
         end do
 

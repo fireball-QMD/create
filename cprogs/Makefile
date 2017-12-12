@@ -69,8 +69,8 @@ INTERPOLATERS = interpolate2d.o psiofr.o rprimeofr.o vnnaofr.o vppofr.o buildspl
 		dpsiofr.o
 
 INTEGRALS = onecenterxc.o onecenternuxc.o onecenternuxcs.o mk_index.o \
-	mk_indexPP.o rescaled_psi.o threecenter.o gleg.o \
-	threecenter_integral.o twocenter.o twocenter_integral.o \
+	mk_indexPP.o mk_indexDipX.o mk_indexDipY.o rescaled_psi.o threecenter.o \
+	gleg.o  threecenter_integral.o twocenter.o twocenter_integral.o \
 	exc1crho.o nuxc1crho.o goverlap1c.o
 
 KINETIC = kinetic.o Pintegral.o Tintegral.o bessel.o tree.o
@@ -218,6 +218,10 @@ mk_index.o : INTEGRALS/mk_index.f $(MODULES)
 	$(F77) $(FFLAGS) -c INTEGRALS/mk_index.f
 mk_indexPP.o : INTEGRALS/mk_indexPP.f $(MODULES)
 	$(F77) $(FFLAGS) -c INTEGRALS/mk_indexPP.f
+mk_indexDipX.o : INTEGRALS/mk_indexDipX.f $(MODULES)
+	$(F77) $(FFLAGS) -c INTEGRALS/mk_indexDipX.f
+mk_indexDipY.o : INTEGRALS/mk_indexDipY.f $(MODULES)
+	$(F77) $(FFLAGS) -c INTEGRALS/mk_indexDipY.f
 rescaled_psi.o : INTEGRALS/rescaled_psi.f90 $(MODULES)
 	$(F90) $(FFLAGS) -c INTEGRALS/rescaled_psi.f90
 threecenter.o : INTEGRALS/threecenter.f90 parameters.inc quadrature.inc $(MODULES)
