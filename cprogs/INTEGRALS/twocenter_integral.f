@@ -201,21 +201,53 @@
  
         clm(1,-1) = sqrt(3.0d0/2.0d0)
         clm(1,0)  = sqrt(3.0d0)
-        clm(1,1)  = - sqrt(3.0d0/2.0d0)
+        clm(1,1)  = sqrt(3.0d0/2.0d0)
  
         clm(2,-2) = sqrt(15.0d0/8.0d0)
         clm(2,-1) = sqrt(15.0d0/2.0d0)
         clm(2,0)  = sqrt(5.0d0/4.0d0)
-        clm(2,1)  = - sqrt(15.0d0/2.0d0)
+        clm(2,1)  = sqrt(15.0d0/2.0d0)
         clm(2,2)  = sqrt(15.0d0/8.0d0)
  
         clm(3,-3) = sqrt(35.0d0/16.0d0)
         clm(3,-2) = sqrt(105.0d0/8.0d0)
         clm(3,-1) = sqrt(21.0d0/16.0d0)
         clm(3,0)  = sqrt(7.0d0/4.0d0)
-        clm(3,1)  = - sqrt(21.0d0/16.0d0)
+        clm(3,1)  = sqrt(21.0d0/16.0d0)
         clm(3,2)  = sqrt(105.0d0/8.0d0)
-        clm(3,3)  = - sqrt(35.0d0/16.0d0)
+        clm(3,3)  = sqrt(35.0d0/16.0d0)
+
+        if (interaction .eq. 9) then
+
+          clm(0,0)  = sqrt(1.0d0/2.0d0)
+
+          clm(1,-1) = sqrt(3.0d0/2.0d0)
+          clm(1,0)  = sqrt(3.0d0/2.0d0)
+          clm(1,1)  = sqrt(3.0d0/2.0d0)
+
+          clm(2,-2) = sqrt(15.0d0/32.0d0)
+          clm(2,-1) = sqrt(15.0d0/2.0d0)
+          clm(2,0)  = sqrt(5.0d0/8.0d0)
+          clm(2,1)  = sqrt(15.0d0/2.0d0)
+          clm(2,2)  = -sqrt(15.0d0/32.0d0)
+
+        endif
+
+        if (interaction .eq. 10) then
+
+          clm(0,0)  = sqrt(1.0d0/2.0d0)
+
+          clm(1,-1) = sqrt(3.0d0/2.0d0)
+          clm(1,0)  = sqrt(3.0d0/2.0d0)
+          clm(1,1)  = sqrt(3.0d0/2.0d0)
+
+          clm(2,-2) = sqrt(15.0d0/32.0d0)
+          clm(2,-1) = sqrt(15.0d0/2.0d0)
+          clm(2,0)  = sqrt(5.0d0/8.0d0)
+          clm(2,1)  = sqrt(15.0d0/2.0d0)
+          clm(2,2)  = sqrt(15.0d0/32.0d0)
+
+        endif
  
 ! Initialize the sum to zero
         sum = 0.0d0
