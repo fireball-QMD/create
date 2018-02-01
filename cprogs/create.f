@@ -1473,23 +1473,6 @@
            ideriv = 0
            ispher = .false.
 
-      write(*,*) 'dip_y type1=', itype1, 'type2=', itype2
-      write(*,*) 'n1=',n1(1),n1(2),n1(3),n1(4),n1(5),n1(6)
-      !write(*,*) 'n1=',n1(7),n1(8),n1(9),n1(10),n1(11)
-      write(*,*) 'l1=',l1(1),l1(2),l1(3),l1(4),l1(5),l1(6)
-      !write(*,*) 'l1=',m1(7),m1(8),m1(9),m1(10),m1(11)
-      write(*,*) 'm1=',m1(1),m1(2),m1(3),m1(4),m1(5),m1(6)
-      !write(*,*) 'm1=',l1(7),l1(8),l1(9),l1(10),l1(11)
-      write(*,*) 'n2=',n2(1),n2(2),n2(3),n2(4),n2(5),n2(6)
-      !write(*,*) 'n2=',n2(7),n2(8),n2(9),n2(10),n2(11)
-      write(*,*) 'l2=',l2(1),l2(2),l2(3),l2(4),l2(5),l2(6)
-      !write(*,*) 'l2=',l2(7),l2(8),l2(9),l2(10),l2(11)
-      write(*,*) 'm2=',m2(1),m2(2),m2(3),m2(4),m2(5),m2(6)
-      !write(*,*) 'm2=',m2(7),m2(8),m2(9),m2(10),m2(11)
-      write(*,*) 'index=',index,'type1=',itype1,'type2=',itype2
-      write(*,*)  'index_max', index_max
-
-
            call twocenter (interaction, isorp, ideriv, iexc, fraction,
      1                     itype1, itype2, atom1, atom2, what1, what2,
      2                     nzx1, nzx2, rcutoff1, rcutoff2, nssh2, nzd,
@@ -1551,23 +1534,6 @@
            isorp = 0
            ideriv = 0
            ispher = .false.
-
-      write(*,*) 'dip_x type1=', itype1, 'type2=', itype2
-      write(*,*) 'n1=',n1(1),n1(2),n1(3),n1(4),n1(5),n1(6)
-      !write(*,*) 'n1=',n1(7),n1(8),n1(9),n1(10),n1(11)
-      write(*,*) 'l1=',l1(1),l1(2),l1(3),l1(4),l1(5),l1(6)
-      !write(*,*) 'l1=',m1(7),m1(8),m1(9),m1(10),m1(11)
-      write(*,*) 'm1=',m1(1),m1(2),m1(3),m1(4),m1(5),m1(6)
-      !write(*,*) 'm1=',l1(7),l1(8),l1(9),l1(10),l1(11)
-      write(*,*) 'n2=',n2(1),n2(2),n2(3),n2(4),n2(5),n2(6)
-      !write(*,*) 'n2=',n2(7),n2(8),n2(9),n2(10),n2(11)
-      write(*,*) 'l2=',l2(1),l2(2),l2(3),l2(4),l2(5),l2(6)
-      !write(*,*) 'l2=',l2(7),l2(8),l2(9),l2(10),l2(11)
-      write(*,*) 'm2=',m2(1),m2(2),m2(3),m2(4),m2(5),m2(6)
-      !write(*,*) 'm2=',m2(7),m2(8),m2(9),m2(10),m2(11)
-      write(*,*) 'index=',index,'type1=',itype1,'type2=',itype2
-      write(*,*)  'index_max', index_max
-
 
            call twocenter (interaction, isorp, ideriv, iexc, fraction,
      1                     itype1, itype2, atom1, atom2, what1, what2,
