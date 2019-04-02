@@ -9,8 +9,8 @@
 1                 ixc_atom          ! two-center xc atom (dvxc)
 1                 ixc_corr          ! two-center xc correction
 1                 idipole_z         ! dipole (two-center)
-0                 idipole_y         ! dipole (two-center), Note B
-0                 idipole_x         ! dipole (two-center), Note B
+1                 idipole_y         ! dipole (two-center), Note B
+1                 idipole_x         ! dipole (two-center), Note B
 1                 icoulomb          ! short range coulomb (two-center)
 1                 ibcna             ! three-center neutral atom
 1                 ibcxc             ! three-center xc
