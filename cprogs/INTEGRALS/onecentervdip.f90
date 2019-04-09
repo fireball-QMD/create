@@ -63,13 +63,18 @@
      &                            drr_rho)
         use constants
         implicit none
+
+
+!rcutoffa_max necesitamos que sea rcutoffa_min,
+
+
  
 ! Argument Declaration and Description
 ! ===========================================================================
 ! Input
         integer, intent (in) :: iexc
         integer, intent (in) :: nsh_max
-        integer, intent (in) :: nspec
+        /integer, intent (in) :: nspec
         integer, intent (in) :: nspec_max
         integer, intent (in) :: wfmax_points
 
@@ -160,7 +165,7 @@
          jssh = iderorb(in1)
  
          drho = drr_rho(in1)
-         rcutoff = rcutoffa_max(in1)
+         rcutoff = rcutoffa_min(in1) !, rcutoffa_max(in1)
          allocate (xnocc_in (nssh))
          xnocc_in(1:nssh) = xnocc(1:nssh,in1)
  
@@ -173,41 +178,93 @@
 ! Integrals <i|exc(i)-mu(i)|i> and <i.nu|mu(i)|i.nu'>
 ! ***************************************************************************
 ! First initialize the answer array
-         allocate (answer (nssh, nssh))
-         answer = 0.0d0
+         
+         allocate (index_l (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l1 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l2 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l3 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l4 (index_max)) !nos da los que son diferentes de 0 logical
+         !cargar 
+
+
+         allocate (answer  (index_max))
+         allocate (answer1 (index_max))
+         allocate (answer2 (index_max))
+         answer1 = 0.0d0
+         answer2 = 0.0d0
  
 ! Fix the endpoints and initialize the increments dz and drho.
          rhomin = 0.0d0
-         rhomax = rcutoff
+         rhomax = rcutoff  ! es el minimo...
  
          nnrho = nint((rhomax - rhomin)/drho) + 1
  
 ! Here we loop over rho.
-         do irho = 1, nnrho
-          rho = rhomin + dfloat(irho - 1)*drho
+       
+         do irho1= 1, nnrho
+         rho1 = rhomin + dfloat(irho1 - 1)*drho
+         do irho2= 1, irho1 !ojo com =1 .. puede ser 2
+          rho2 = rhomin + dfloat(irho2 - 1)*drho
  
           factor = 2.0d0*drho/3.0d0
           if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
           if (irho .eq. 1 .or. irho .eq. nnrho) factor = drho/3.0d0
  
 ! Compute the exchange correlation potential
-          rh = rho1c(irho)*abohr**3
-          rhp = rhop1c(irho)*abohr**4
-          rhpp = rhopp1c(irho)*abohr**5
-          call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc,    &
-     &                      dnuxc, dnuxcs, dexc)
+!          rh = rho1c(irho)*abohr**3
+!          rhp = rhop1c(irho)*abohr**4
+!          rhpp = rhopp1c(irho)*abohr**5
+!          call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc,    &
+!     &                      dnuxc, dnuxcs, dexc)
  
 ! Convert to eV
-          dnuxc = dnuxc*Hartree*abohr**3
- 
-          do issh = 1, nssh
-           do jssh = 1, nssh
-            answer(issh,jssh) = answer(issh,jssh)                            &
-     &       + dnuxc*factor*rho**2*(psiofr(in1,issh,rho)**2)                 &
-     &         *(psiofr(in1,jssh,rho)**2/(4.0d0*pi))
-           end do
-          end do
+!          dnuxc = dnuxc*Hartree*abohr**3
+  
+!          do issh = 1, nssh
+!           do jssh = 1, nssh
+!            answer(issh,jssh) = answer(issh,jssh)                            &
+!     &       + dnuxc*factor*rho**2*(psiofr(in1,issh,rho)**2)                 &
+!     &         *(psiofr(in1,jssh,rho)**2/(4.0d0*pi))
+!           end do
+!          end do
+          do ind = 1, index_max
+            l=index_l(ind)
+            l1=index_l1(ind)
+            l2=index_l2(ind)
+            l3=index_l3(ind)
+            l4=index_l4(ind)
+
+            answer1(ind) = answer1(ind)                       &
+     &       + factor1*rho1**(1-l)*(psiofr(in1,l1,rho1)*psiofr(in1,l2,rho1))*  &
+     &         factor2*rho2**(2+l)*(psiofr(in1,l3,rho2)*psiofr(in1,l4,rho2))
+
+           end do !ind
+         end do !rho1
+         end do !rho2
+
+
+         do irho1= 1, nnrho
+         rho1 = rhomin + dfloat(irho1 - 1)*drho
+          do irho2= (irho1+1), nnrho !pesar ....
+          rho2 = rhomin + dfloat(irho2 - 1)*drho
+           amswer2 .......
+         
          end do
+         end do
+
+        I(l1,l2,l3,l4,m1,m2,m3,m4)=0
+        hacemos 8 loops y lo vamos sumando multiplicado por su gaunt
+        do l=0, 3
+        do ind = 1, index_max
+        if l = 
+        *(4.0d0*pi)/(2*l+1))
+           
+        enddo
+        enddo
+
+
+
+
          do issh = 1, nssh
           write (36,500) answer(issh,1:nssh)
          end do
