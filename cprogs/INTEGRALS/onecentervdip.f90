@@ -35,8 +35,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-!
-! onecenternuxc.f90
+! onecentervdip.f90  ....... onecenternuxc.f90
 ! Program Description
 ! ===========================================================================
 !       This routine calculates the one-center integrals for the exchange-
@@ -46,18 +45,12 @@
 !
 ! ===========================================================================
 ! Code written by:
-! James P. Lewis
-! Department of Physics and Astronomy
-! Brigham Young University
-! N233 ESC P.O. Box 24658 
-! Provo, UT 841184602-4658
-! FAX 801-422-2265
-! Office telephone 801-422-7444
+! Dani y JOM 
 ! ===========================================================================
 !
-! Program Declaration
+! Program 1Declaration
 ! ===========================================================================
-        subroutine onecenternuxc (nspec, nspec_max, nsh_max, wfmax_points,   &
+        subroutine onecentervdip (nspec, nspec_max, nsh_max, wfmax_points,   &
      &                            iexc, fraction, nsshxc, rcutoffa_max,      &
      &                            xnocc, dqorb, iderorb, what, signature,    &
      &                            drr_rho)
@@ -74,7 +67,7 @@
 ! Input
         integer, intent (in) :: iexc
         integer, intent (in) :: nsh_max
-        /integer, intent (in) :: nspec
+        integer, intent (in) :: nspec
         integer, intent (in) :: nspec_max
         integer, intent (in) :: wfmax_points
 
@@ -135,7 +128,7 @@
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
-        open (unit = 36, file = 'coutput/nuxc_onecenter.dat',                &
+        open (unit = 36, file = 'coutput/vdip_onecenter.dat',                &
      &        status = 'unknown')
  
 ! Set up the header for the output file.
@@ -274,7 +267,7 @@
  
         write (36,*) '  '
         write (*,*) '  '
-        write (*,*) ' Writing output to: coutput/nuxc_onecenter.dat '
+        write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
         write (*,*) '  '
  
         close (unit = 36)
