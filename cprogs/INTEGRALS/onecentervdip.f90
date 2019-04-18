@@ -100,6 +100,7 @@
         integer jssh
         integer nnrho
         integer nssh
+        integer irho1,rho1,irho2,rho2,l,l1,l2,l3,l4,ind
  
         real*8 dnuxc
         real*8 dnuxcs
@@ -108,6 +109,8 @@
         real*8 exc
         real*8 dexc
         real*8 factor
+        real*8 factor1
+        real*8 factor2
         real*8 rcutoff
         real*8 rho
         real*8 rhomin
@@ -117,13 +120,22 @@
         real*8 rhpp
         real*8 vxc
  
-        real*8, dimension (:, :), allocatable :: answer
+        real*8, dimension (:,:), allocatable :: answer
+        real*8, dimension (:), allocatable :: answer1
+        real*8, dimension (:), allocatable :: answer2
+        integer, parameter  :: index_max = 10
+        integer, dimension (:), allocatable :: index_l
+        integer, dimension (:), allocatable :: index_l1
+        integer, dimension (:), allocatable :: index_l2
+        integer, dimension (:), allocatable :: index_l3
+        integer, dimension (:), allocatable :: index_l4
         real*8, dimension (:), allocatable :: rho1c
         real*8, dimension (:), allocatable :: rhop1c
         real*8, dimension (:), allocatable :: rhopp1c
         real*8, dimension (:), allocatable :: xnocc_in
  
         real*8, external :: psiofr
+
  
 ! Procedure
 ! ===========================================================================
@@ -158,7 +170,7 @@
          jssh = iderorb(in1)
  
          drho = drr_rho(in1)
-         rcutoff = rcutoffa_min(in1) !, rcutoffa_max(in1)
+         !rcutoff = rcutoffa_min(in1) !, rcutoffa_max(in1)
          allocate (xnocc_in (nssh))
          xnocc_in(1:nssh) = xnocc(1:nssh,in1)
  
@@ -180,7 +192,7 @@
          !cargar 
 
 
-         allocate (answer  (index_max))
+         !allocate (answer  (index_max))
          allocate (answer1 (index_max))
          allocate (answer2 (index_max))
          answer1 = 0.0d0
@@ -240,20 +252,20 @@
          rho1 = rhomin + dfloat(irho1 - 1)*drho
           do irho2= (irho1+1), nnrho !pesar ....
           rho2 = rhomin + dfloat(irho2 - 1)*drho
-           amswer2 .......
+           !amswer2 .......
          
          end do
          end do
 
-        I(l1,l2,l3,l4,m1,m2,m3,m4)=0
-        hacemos 8 loops y lo vamos sumando multiplicado por su gaunt
-        do l=0, 3
-        do ind = 1, index_max
-        if l = 
-        *(4.0d0*pi)/(2*l+1))
+        !I(l1,l2,l3,l4,m1,m2,m3,m4)=0
+        !hacemos 8 loops y lo vamos sumando multiplicado por su gaunt
+        !do l=0, 3
+        !do ind = 1, index_max
+        !if l = 
+        !*(4.0d0*pi)/(2*l+1))
            
-        enddo
-        enddo
+        !enddo
+        !enddo
 
 
 
