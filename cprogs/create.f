@@ -516,11 +516,6 @@
           call goverlap1c (nspec, nspec_max, nsh_max, wfmax_points, 
      1                      nssh, lssh, rcutoffa_max, what, 
      3                      signature, drr_rho)
-! -------- 
-          call onecentervdip (nspec, nspec_max, nsh_max, wfmax_points, 
-     1                      iexc, fraction, nsshxc, lsshxc, 
-     2                      rcutoffa_max, xnocc, dqorb, iderorb, what, 
-     3                      signature, drr_rho, dqint)
 ! JOM-end 
           call onecenterxc (nspec, nspec_max, nsh_max, wfmax_points, 
      1                      iexc, fraction, nsshxc, lsshxc, 
@@ -578,6 +573,14 @@
          end if
         end if ! end master
  
+
+! -------- 
+          call onecentervdip (nspec, nspec_max, nsh_max, wfmax_points, 
+     1                        iexc_new, fraction, nsshxc, rcutoffa_max, 
+     2                        xnocc, dqorb, iderorb, what, signature, 
+     3                        drr_rho, dqint)
+
+
 ! ======================================================================
 ! I. Perform three-center calculations
 ! ======================================================================

@@ -57,7 +57,7 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
+        real*8 function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
         implicit none
  
 ! Argument Declaration and Description
@@ -76,8 +76,8 @@
 ! Local Parameters and Data Declaration
 ! ===========================================================================
         integer :: m
-        complex :: YXX
-        complex :: gauntComplex
+        complex*8 :: YXX
+        complex*8 :: gauntComplex
  
 ! Procedure
 ! ===========================================================================
@@ -92,7 +92,7 @@
 
 ! Program Declaration
 ! ===========================================================================
-        complex function YXX (l,l3,l4,m,m3,m4)
+        complex*8 function YXX (l,l3,l4,m,m3,m4)
         implicit none
  
 ! Argument Declaration and Description
@@ -104,8 +104,8 @@
         integer, intent (in) :: m
         integer, intent (in) :: m3
         integer, intent (in) :: m4
-        real :: aux
-        real :: gaunt
+        real*8 :: aux
+        real*8 :: gaunt
 ! Procedure
 ! ===========================================================================
         YXX=(0,0)

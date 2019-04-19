@@ -213,7 +213,7 @@
  
  
 ! JOM-test
-            write(*,*)'dpsiofr', rho , psiofr(1,2,rho), dpsiofr(1,2,rho)
+           ! write(*,*)'dpsiofr', rho , psiofr(1,2,rho), dpsiofr(1,2,rho)
            do issh = 1, nssh
             l1 = lsshxc(in1,issh)
             do jssh = 1, nssh

@@ -100,7 +100,7 @@
         integer jssh
         integer nnrho
         integer nssh
-        integer irho1,rho1,irho2,rho2,l,l1,l2,l3,l4,ind
+        integer irho1,rho1,irho2,rho2,ind,indtot
  
         real*8 dnuxc
         real*8 dnuxcs
@@ -123,12 +123,17 @@
         real*8, dimension (:,:), allocatable :: answer
         real*8, dimension (:), allocatable :: answer1
         real*8, dimension (:), allocatable :: answer2
-        integer, parameter  :: index_max = 10
+        integer :: index_max
         integer, dimension (:), allocatable :: index_l
         integer, dimension (:), allocatable :: index_l1
         integer, dimension (:), allocatable :: index_l2
         integer, dimension (:), allocatable :: index_l3
         integer, dimension (:), allocatable :: index_l4
+        integer, dimension (:), allocatable :: index_m1
+        integer, dimension (:), allocatable :: index_m2
+        integer, dimension (:), allocatable :: index_m3
+        integer, dimension (:), allocatable :: index_m4
+        real*8, dimension (:), allocatable :: GR
         real*8, dimension (:), allocatable :: rho1c
         real*8, dimension (:), allocatable :: rhop1c
         real*8, dimension (:), allocatable :: rhopp1c
@@ -136,7 +141,11 @@
  
         real*8, external :: psiofr
 
- 
+        integer, parameter :: lmax = 2
+        integer :: l,l1,l2,l3,l4,m1,m2,m3,m4
+        real*8 :: g,sum_l
+        real*8 :: gauntReal
+  
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
@@ -180,21 +189,95 @@
      &                     xnocc_in, ideriv + 1, wfmax_points, rho1c, rhop1c,&
      &                     rhopp1c)
  
-! Integrals <i|exc(i)-mu(i)|i> and <i.nu|mu(i)|i.nu'>
-! ***************************************************************************
-! First initialize the answer array
+! ===========================================================================
+        g=0.0d0
+        l1=0
+        l2=0
+        l3=0
+        l4=0
+        m1=0
+        m2=0
+        m3=0
+        m4=0
+        l=0
+        ind=0
+        indtot=0
+         do l1 = 0 , lmax
+           do l2 = 0 , lmax
+             do l3 = 0 , lmax
+               do l4 = 0 , lmax
+                 do m1 = -l1 , l1
+                   do m2 = -l2 , l2
+                     do m3 = -l3 , l3
+                       do m4 = -l4 , l4
+                         do l = 0, 4 
+                           indtot=indtot+1
+                           if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
+                             ind=ind+1
+                             write(*,'(9I5,2x,1F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                           end if 
+                         enddo
+                       enddo
+                     enddo
+                   enddo
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+         write(*,*) 'hay ',ind, ' diferentes de 0, de ',indtot
+         index_max=ind-1
          
          allocate (index_l (index_max)) !nos da los que son diferentes de 0 logical
          allocate (index_l1 (index_max)) !nos da los que son diferentes de 0 logical
          allocate (index_l2 (index_max)) !nos da los que son diferentes de 0 logical
          allocate (index_l3 (index_max)) !nos da los que son diferentes de 0 logical
          allocate (index_l4 (index_max)) !nos da los que son diferentes de 0 logical
-         !cargar 
-
-
-         !allocate (answer  (index_max))
+         allocate (index_m1 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_m2 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_m3 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_m4 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (GR (index_max)) !nos da los que son diferentes de 0 logical
          allocate (answer1 (index_max))
          allocate (answer2 (index_max))
+         ind=0
+         do l1 = 0 , lmax
+           do l2 = 0 , lmax
+             do l3 = 0 , lmax
+               do l4 = 0 , lmax
+                 do m1 = -l1 , l1
+                   do m2 = -l2 , l2
+                     do m3 = -l3 , l3
+                       do m4 = -l4 , l4
+                         do l = 0, 4 
+                           if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
+                             index_l(ind)=l
+                             index_l1(ind)=l1
+                             index_l2(ind)=l2
+                             index_l3(ind)=l3
+                             index_l4(ind)=l4
+                             index_m1(ind)=m1
+                             index_m2(ind)=m2
+                             index_m3(ind)=m3
+                             index_m4(ind)=m4
+                             GR(ind)=gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                             ind=ind+1
+                             !write(*,'(9I5,2x,1F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                           end if 
+                         enddo
+                       enddo
+                     enddo
+                   enddo
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+
+         do ind = 0, index_max
+           write(36,'(9I5,2x,1F10.8)') index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind),GR(ind)
+         enddo
+
          answer1 = 0.0d0
          answer2 = 0.0d0
  
