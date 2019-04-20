@@ -232,6 +232,7 @@
         real*8 rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
         real*8 rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
         real*8 rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
+        real*8 rcutoffa_min (nspec_max)     ! cutoff radius in angstroms
         real*8 xmass (nspec_max)
  
         character*2 atom1, atom2, atom3
@@ -302,8 +303,8 @@
 ! **********************************************************************
 ! Read in create.input and set up some data
         call readcreate (nspec, iammaster, iammpi, atom, what, nssh,
-     1                   lssh, nzx, rcutoff, rcutoffa, rcutoffa_max,
-     2                   xmass, ppfile, napot, wavefxn)
+     1                   lssh, nzx, rcutoff, rcutoffa, rcutoffa_max, 
+     2                   rcutoffa_min, xmass, ppfile, napot, wavefxn)
  
 ! **********************************************************************
 ! We now read in a theory.input file. This determines certain defaults
@@ -576,7 +577,7 @@
 
 ! -------- 
           call onecentervdip (nspec, nspec_max, nsh_max, wfmax_points, 
-     1                        iexc_new, fraction, nsshxc, rcutoffa_max, 
+     1                        iexc_new, fraction, nsshxc, rcutoffa_min, 
      2                        xnocc, dqorb, iderorb, what, signature, 
      3                        drr_rho, dqint)
 

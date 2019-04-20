@@ -51,7 +51,7 @@
 ! Program 1Declaration
 ! ===========================================================================
         subroutine onecentervdip (nspec, nspec_max, nsh_max, wfmax_points,   &
-     &                            iexc, fraction, nsshxc, rcutoffa_max,      &
+     &                            iexc, fraction, nsshxc, rcutoffa_min,      &
      &                            xnocc, dqorb, iderorb, what, signature,    &
      &                            drr_rho)
         use constants
@@ -78,7 +78,7 @@
  
         real*8, intent (in), dimension (nspec_max) :: dqorb
         real*8, intent (in), dimension (nspec_max) :: drr_rho
-        real*8, intent (in), dimension (nspec_max) :: rcutoffa_max
+        real*8, intent (in), dimension (nspec_max) :: rcutoffa_min
         real*8, intent (in), dimension (nsh_max, nspec_max) :: xnocc
  
         character (len=70), intent (in) :: signature
@@ -264,7 +264,7 @@
          jssh = iderorb(in1)
  
          drho = drr_rho(in1)
-         !rcutoff = rcutoffa_min(in1) !, rcutoffa_max(in1)
+         rcutoff = rcutoffa_min(in1) !, rcutoffa_max(in1)
          allocate (xnocc_in (nssh))
          xnocc_in(1:nssh) = xnocc(1:nssh,in1)
  
@@ -282,6 +282,12 @@
  
 ! Here we loop over rho.
        
+         do irho1= 1, nnrho
+           rho1 = rhomin + dfloat(irho1 - 1)*drho
+           write(36,*) rho1,psiofr(in1,1,rho1)
+         end do
+
+
          do irho1= 1, nnrho
            rho1 = rhomin + dfloat(irho1 - 1)*drho
 
@@ -339,21 +345,20 @@
            end do !rho1
          end do !rho2
         
-         do ind = 0, index_max
-           write(36,'(9I5,2x,F10.8,2x,F10.8)') index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind), &
-                         &  gauntReal(index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind)), &
-                         &  R(index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind))
-                          
-         enddo
+!         do ind = 0, index_max
+!           write(36,'(9I5,2x,F10.8,2x,F10.8)') index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind), &
+!                         &  gauntReal(index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind)), &
+!                         &  R(index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind))
+!         enddo
 
 
 
-         do issh = 1, nssh
-          write (36,500) answer(issh,1:nssh)
-         end do
-         deallocate (xnocc_in)
-         deallocate (answer)
-        end do
+!         do issh = 1, nssh
+!          write (36,500) answer(issh,1:nssh)
+!         end do
+!         deallocate (xnocc_in)
+!         deallocate (answer)
+        end do !nspec
  
 
 !I(l1,l2,l3,l4,m1,m2,m3,m4) =I(li,mi) =SUM_L (4pi/(2l+ 1)) * R(l,li) * GR(l,li,mi)

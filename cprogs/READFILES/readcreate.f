@@ -49,8 +49,8 @@
 ! ===========================================================================
         subroutine readcreate (nspec, iammaster, iammpi, atom, what,
      1                         nssh, lssh, nzx, rcutoff, rcutoffa,
-     2                         rcutoffa_max, xmass, ppfile, napot,
-     3                         wavefxn)
+     2                         rcutoffa_max,rcutoffa_min, xmass, ppfile,
+     3                         napot, wavefxn)
         implicit none
  
         include '../parameters.inc'
@@ -72,6 +72,7 @@
         real*8 rcutoff (nspec_max, nsh_max) ! cutoff radius in bohr
         real*8 rcutoffa (nspec_max, nsh_max)! cutoff radius in angstroms
         real*8 rcutoffa_max (nspec_max)     ! cutoff radius in angstroms
+        real*8 rcutoffa_min (nspec_max)     ! cutoff radius in angstroms
         real*8 xmass (nspec_max)
  
         character*2 atom (nspec_max)
@@ -263,15 +264,20 @@
 ! First find the largest rc.
         do ispec = 1, nspec
          rcutoffa_max(ispec) = -1.0d0
+         rcutoffa_min(ispec) = 100.0d0
          do issh = 1, nssh(ispec)
           rcutoffa_max(ispec) =
      1     max(rcutoffa_max(ispec),rcutoffa(ispec,issh))
+          rcutoffa_min(ispec) =
+     1     min(rcutoffa_min(ispec),rcutoffa(ispec,issh))
          end do
          if (iammaster) then
           write (*,*) '  '
           write (*,*) ' For ispec = ', ispec
           write (*,*) ' Largest rcutoffa_max (Angstrom)= ', 
      1  rcutoffa_max(ispec)
+          write (*,*) ' Min rcutoffa_min (Angstrom)= ', 
+     1  rcutoffa_min(ispec)
           write (*,*) '  '
          end if ! end master
         end do
