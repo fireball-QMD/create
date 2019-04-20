@@ -133,7 +133,6 @@
         integer, dimension (:), allocatable :: index_m2
         integer, dimension (:), allocatable :: index_m3
         integer, dimension (:), allocatable :: index_m4
-        real*8, dimension (:), allocatable :: GR
         real*8, dimension (:), allocatable :: rho1c
         real*8, dimension (:), allocatable :: rhop1c
         real*8, dimension (:), allocatable :: rhopp1c
@@ -142,10 +141,12 @@
         real*8, external :: psiofr
 
         integer, parameter :: lmax = 2
+        integer, parameter :: loop_lmax = 5 ! loop max = loop_lmax-1
         integer :: l,l1,l2,l3,l4,m1,m2,m3,m4
         real*8 :: g,sum_l
         real*8 :: gauntReal
-  
+        real*8, dimension (0:lmax,0:lmax,0:lmax,0:lmax,-lmax:lmax,-lmax:lmax,-lmax:lmax,-lmax:lmax) :: I
+        real*8, dimension (loop_lmax,0:lmax,0:lmax,0:lmax,0) :: R
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
@@ -163,6 +164,90 @@
         end do
         write (36,100)
  
+
+! ===========================================================================
+        g=0.0d0
+        l1=0
+        l2=0
+        l3=0
+        l4=0
+        m1=0
+        m2=0
+        m3=0
+        m4=0
+        l=0
+        ind=0
+        indtot=0
+         do l1 = 0 , lmax
+           do l2 = 0 , lmax
+             do l3 = 0 , lmax
+               do l4 = 0 , lmax
+                 do m1 = -l1 , l1
+                   do m2 = -l2 , l2
+                     do m3 = -l3 , l3
+                       do m4 = -l4 , l4
+                         do l = 0, 4 
+                           indtot=indtot+1
+                           if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
+                             ind=ind+1
+                             ! write(*,'(9I5,2x,1F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                           end if 
+                         enddo
+                       enddo
+                     enddo
+                   enddo
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+         write(*,*) 'hay ',ind, ' diferentes de 0, de ',indtot
+         index_max=ind-1
+         
+         allocate (index_l (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l1 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l2 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l3 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_l4 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_m1 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_m2 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_m3 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (index_m4 (index_max)) !nos da los que son diferentes de 0 logical
+         allocate (answer1 (index_max))
+         allocate (answer2 (index_max))
+         ind=0
+         do l1 = 0 , lmax
+           do l2 = 0 , lmax
+             do l3 = 0 , lmax
+               do l4 = 0 , lmax
+                 do m1 = -l1 , l1
+                   do m2 = -l2 , l2
+                     do m3 = -l3 , l3
+                       do m4 = -l4 , l4
+                         do l = 0, 4 
+                           if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
+                             index_l(ind)=l
+                             index_l1(ind)=l1
+                             index_l2(ind)=l2
+                             index_l3(ind)=l3
+                             index_l4(ind)=l4
+                             index_m1(ind)=m1
+                             index_m2(ind)=m2
+                             index_m3(ind)=m3
+                             index_m4(ind)=m4
+                             !GR(l,l1,l2,l3,l4,m1,m2,m3,m4)=gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                             ind=ind+1
+                           end if 
+                         enddo
+                       enddo
+                     enddo
+                   enddo
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+
 ! Loop over the different charge types (0, -1, or +1).
         ideriv = 0
  
@@ -189,98 +274,6 @@
      &                     xnocc_in, ideriv + 1, wfmax_points, rho1c, rhop1c,&
      &                     rhopp1c)
  
-! ===========================================================================
-        g=0.0d0
-        l1=0
-        l2=0
-        l3=0
-        l4=0
-        m1=0
-        m2=0
-        m3=0
-        m4=0
-        l=0
-        ind=0
-        indtot=0
-         do l1 = 0 , lmax
-           do l2 = 0 , lmax
-             do l3 = 0 , lmax
-               do l4 = 0 , lmax
-                 do m1 = -l1 , l1
-                   do m2 = -l2 , l2
-                     do m3 = -l3 , l3
-                       do m4 = -l4 , l4
-                         do l = 0, 4 
-                           indtot=indtot+1
-                           if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
-                             ind=ind+1
-                             write(*,'(9I5,2x,1F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-                           end if 
-                         enddo
-                       enddo
-                     enddo
-                   enddo
-                 enddo
-               enddo
-             enddo
-           enddo
-         enddo
-         write(*,*) 'hay ',ind, ' diferentes de 0, de ',indtot
-         index_max=ind-1
-         
-         allocate (index_l (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l1 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l2 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l3 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l4 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_m1 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_m2 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_m3 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_m4 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (GR (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (answer1 (index_max))
-         allocate (answer2 (index_max))
-         ind=0
-         do l1 = 0 , lmax
-           do l2 = 0 , lmax
-             do l3 = 0 , lmax
-               do l4 = 0 , lmax
-                 do m1 = -l1 , l1
-                   do m2 = -l2 , l2
-                     do m3 = -l3 , l3
-                       do m4 = -l4 , l4
-                         do l = 0, 4 
-                           if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
-                             index_l(ind)=l
-                             index_l1(ind)=l1
-                             index_l2(ind)=l2
-                             index_l3(ind)=l3
-                             index_l4(ind)=l4
-                             index_m1(ind)=m1
-                             index_m2(ind)=m2
-                             index_m3(ind)=m3
-                             index_m4(ind)=m4
-                             GR(ind)=gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-                             ind=ind+1
-                             !write(*,'(9I5,2x,1F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-                           end if 
-                         enddo
-                       enddo
-                     enddo
-                   enddo
-                 enddo
-               enddo
-             enddo
-           enddo
-         enddo
-
-         do ind = 0, index_max
-           write(36,'(9I5,2x,1F10.8)') index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind),GR(ind)
-         enddo
-
-         answer1 = 0.0d0
-         answer2 = 0.0d0
- 
 ! Fix the endpoints and initialize the increments dz and drho.
          rhomin = 0.0d0
          rhomax = rcutoff  ! es el minimo...
@@ -290,66 +283,68 @@
 ! Here we loop over rho.
        
          do irho1= 1, nnrho
-         rho1 = rhomin + dfloat(irho1 - 1)*drho
-         do irho2= 1, irho1 !ojo com =1 .. puede ser 2
-          rho2 = rhomin + dfloat(irho2 - 1)*drho
- 
-          factor = 2.0d0*drho/3.0d0
-          if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
-          if (irho .eq. 1 .or. irho .eq. nnrho) factor = drho/3.0d0
- 
-! Compute the exchange correlation potential
-!          rh = rho1c(irho)*abohr**3
-!          rhp = rhop1c(irho)*abohr**4
-!          rhpp = rhopp1c(irho)*abohr**5
-!          call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc,    &
-!     &                      dnuxc, dnuxcs, dexc)
- 
-! Convert to eV
-!          dnuxc = dnuxc*Hartree*abohr**3
-  
-!          do issh = 1, nssh
-!           do jssh = 1, nssh
-!            answer(issh,jssh) = answer(issh,jssh)                            &
-!     &       + dnuxc*factor*rho**2*(psiofr(in1,issh,rho)**2)                 &
-!     &         *(psiofr(in1,jssh,rho)**2/(4.0d0*pi))
-!           end do
-!          end do
-          do ind = 1, index_max
-            l=index_l(ind)
-            l1=index_l1(ind)
-            l2=index_l2(ind)
-            l3=index_l3(ind)
-            l4=index_l4(ind)
+           rho1 = rhomin + dfloat(irho1 - 1)*drho
 
-            answer1(ind) = answer1(ind)                       &
-     &       + factor1*rho1**(1-l)*(psiofr(in1,l1,rho1)*psiofr(in1,l2,rho1))*  &
-     &         factor2*rho2**(2+l)*(psiofr(in1,l3,rho2)*psiofr(in1,l4,rho2))
+           factor1 = 2.0d0*drho/3.0d0
+           if (mod(irho1, 2) .eq. 0) factor1 = 4.0d0*drho/3.0d0
+           if (irho1 .eq. 1 .or. irho1 .eq. nnrho) factor1 = drho/3.0d0
 
-           end do !ind
-         end do !rho1
+           do irho2= 1, irho1 !ojo cuando irho2=irho1
+             rho2 = rhomin + dfloat(irho2 - 1)*drho
+ 
+             factor2 = 2.0d0*drho/3.0d0
+             if (mod(irho2, 2) .eq. 0) factor2 = 4.0d0*drho/3.0d0
+             if (irho2 .eq. 1 .or. irho2 .eq. irho1) factor2 = drho/3.0d0
+
+             do ind = 1, index_max
+               l=index_l(ind)
+               l1=index_l1(ind)
+               l2=index_l2(ind)
+               l3=index_l3(ind)
+               l4=index_l4(ind)
+               !write(36,*) 'psiofr(in1,l1,rho1)=',in1,l1,rho1,psiofr(in1,l1,rho2)
+               !write(36,*) l,l1,l2,l3,l4,R(l,l1,l2,l3,l4)
+               R(l,l1,l2,l3,l4)=R(l,l1,l2,l3,l4)+                                  &
+               & + factor1*rho1**(1-l*0)*(psiofr(in1,l1,rho1)*psiofr(in1,l2,rho1))*  &
+               &   factor2*rho2**(2+l)*(psiofr(in1,l3,rho2)*psiofr(in1,l4,rho2))
+             end do !ind
+           end do !rho1
          end do !rho2
 
 
          do irho1= 1, nnrho
-         rho1 = rhomin + dfloat(irho1 - 1)*drho
-          do irho2= (irho1+1), nnrho !pesar ....
-          rho2 = rhomin + dfloat(irho2 - 1)*drho
-           !amswer2 .......
-         
-         end do
-         end do
+           rho1 = rhomin + dfloat(irho1 - 1)*drho
 
-        !I(l1,l2,l3,l4,m1,m2,m3,m4)=0
-        !hacemos 8 loops y lo vamos sumando multiplicado por su gaunt
-        !do l=0, 3
-        !do ind = 1, index_max
-        !if l = 
-        !*(4.0d0*pi)/(2*l+1))
-           
-        !enddo
-        !enddo
+           factor1 = 2.0d0*drho/3.0d0
+           if (mod(irho1, 2) .eq. 0) factor1 = 4.0d0*drho/3.0d0
+           if (irho1 .eq. 1 .or. irho1 .eq. nnrho) factor1 = drho/3.0d0
 
+           do irho2= (irho1+1), nnrho 
+             rho2 = rhomin + dfloat(irho2 - 1)*drho
+ 
+             factor2 = 2.0d0*drho/3.0d0
+             if (mod(irho2, 2) .eq. 0) factor2 = 4.0d0*drho/3.0d0
+             if (irho2 .eq. (irho1+1) .or. nnrho .eq. nnrho) factor2 = drho/3.0d0
+
+             do ind = 1, index_max
+               l=index_l(ind)
+               l1=index_l1(ind)
+               l2=index_l2(ind)
+               l3=index_l3(ind)
+               l4=index_l4(ind)
+               R(l,l1,l2,l3,l4)=R(l,l1,l2,l3,l4)+                                  &
+               & + factor1*rho1**(2+l)*(psiofr(in1,l1,rho1)*psiofr(in1,l2,rho1))*  &
+               &   factor2*rho2**(1-l)*(psiofr(in1,l3,rho2)*psiofr(in1,l4,rho2))
+             end do !ind
+           end do !rho1
+         end do !rho2
+        
+         do ind = 0, index_max
+           write(36,'(9I5,2x,F10.8,2x,F10.8)') index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind), &
+                         &  gauntReal(index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind)), &
+                         &  R(index_l(ind), index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind))
+                          
+         enddo
 
 
 
@@ -360,6 +355,35 @@
          deallocate (answer)
         end do
  
+
+!I(l1,l2,l3,l4,m1,m2,m3,m4) =I(li,mi) =SUM_L (4pi/(2l+ 1)) * R(l,li) * GR(l,li,mi)
+! GR(l,l1,l2,l3,l4,m1,m2,m3,m4)=gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+         do l1 = 0 , lmax
+           do l2 = 0 , lmax
+             do l3 = 0 , lmax
+               do l4 = 0 , lmax
+                 do m1 = -l1 , l1
+                   do m2 = -l2 , l2
+                     do m3 = -l3 , l3
+                       do m4 = -l4 , l4
+                         do l = 0, 4
+                           I(l1,l2,l3,l4,m1,m2,m3,m4)=I(l1,l2,l3,l4,m1,m2,m3,m4) +  &
+                           & 4*pi/(2*l+1)*R(l,l1,l2,l3,l4)*gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                         enddo
+                       enddo
+                     enddo
+                   enddo
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+
+
+
+
+
+
         write (36,*) '  '
         write (*,*) '  '
         write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
