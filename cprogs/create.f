@@ -576,10 +576,8 @@
  
 
 ! -------- 
-          call onecentervdip (nspec, nspec_max, nsh_max, wfmax_points, 
-     1                        iexc_new, fraction, nsshxc, rcutoffa_min, 
-     2                        xnocc, dqorb, iderorb, what, signature, 
-     3                        drr_rho, dqint)
+          call onecentervdip (nspec, nspec_max,fraction, nsshxc, 
+     1                    rcutoffa_max, what, signature, drr_rho, dqint)
 
 
 ! ======================================================================

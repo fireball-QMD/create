@@ -85,7 +85,8 @@
         do m=-l,l
           gauntComplex = gauntComplex + ((-1)**m)*YXX(l,l1,l2,-m,m1,m2)*YXX(l,l3,l4,m,m3,m4)
         end do
-
+!poner un warning
+!!!!!!-------------------------------------------------------------------------------------------------------------------------------------------------
         gauntReal = REAL(gauntComplex)
         return 
         end function gauntReal
