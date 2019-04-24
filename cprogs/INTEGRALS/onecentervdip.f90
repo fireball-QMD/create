@@ -84,6 +84,7 @@
         real*8 rho
         real*8 rhomin
         real*8 rhomax
+        real*8 aux
  
         integer :: index_max
         integer, dimension (:), allocatable :: index_l
@@ -91,18 +92,13 @@
         integer, dimension (:), allocatable :: index_l2
         integer, dimension (:), allocatable :: index_l3
         integer, dimension (:), allocatable :: index_l4
-        integer, dimension (:), allocatable :: index_m1
-        integer, dimension (:), allocatable :: index_m2
-        integer, dimension (:), allocatable :: index_m3
-        integer, dimension (:), allocatable :: index_m4
         real*8, dimension (:), allocatable :: answer
         
-        integer :: index_max_l
         real*8, dimension (:), allocatable :: R
  
         real*8, external :: psiofr
 
-        integer, parameter :: lmax = 2
+        integer, parameter :: lmax = 1
         integer :: l,l1,l2,l3,l4,m1,m2,m3,m4
         real*8 :: gauntReal
 ! Procedure
@@ -131,25 +127,28 @@
           do l2 = 0 , lmax
             do l3 = 0 , lmax
               do l4 = 0 , lmax
-                do m1 = -l1 , l1
-                  do m2 = -l2 , l2
-                    do m3 = -l3 , l3
-                      do m4 = -l4 , l4
-                        do l = 0, 4 
-                          indtot=indtot+1
-                          if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
-                            ind=ind+1
-                            write(*,'(9I5,2x,F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-                          end if 
+                do l = 0, 4 
+                  aux=0
+                  do m1 = -l1 , l1
+                    do m2 = -l2 , l2
+                      do m3 = -l3 , l3
+                        do m4 = -l4 , l4
+                          aux=aux+abs(gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4))
                         enddo
                       enddo
-                    enddo
+                    enddo 
                   enddo
-                enddo
-              enddo
-            enddo
-          enddo
-        enddo
+                  indtot=indtot+1
+                  if (aux .ne. 0.0d0) then
+                    ind=ind+1
+                    ! write(*,'(9I5,2x,F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                  !   write(*,'(5I5,2x,F10.8)') l, l1,l2,l3,l4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+                  end if 
+                enddo !l
+              enddo !l4
+            enddo !l3
+          enddo !l2
+        enddo !l1
         write(*,*) 'hay ',ind, ' diferentes de ',indtot
         index_max=ind
        
@@ -157,48 +156,41 @@
         allocate (index_l1 (index_max)) 
         allocate (index_l2 (index_max)) 
         allocate (index_l3 (index_max))
-        allocate (index_l4 (index_max)) 
-        allocate (index_m1 (index_max))
-        allocate (index_m2 (index_max)) 
-        allocate (index_m3 (index_max))
-        allocate (index_m4 (index_max)) 
+        allocate (index_l4 (index_max))
         allocate (answer (index_max))
+        allocate (R(index_max))
         ind=0
-        do l1 = 0 , lmax
+         do l1 = 0 , lmax
           do l2 = 0 , lmax
             do l3 = 0 , lmax
               do l4 = 0 , lmax
-                do m1 = -l1 , l1
-                  do m2 = -l2 , l2
-                    do m3 = -l3 , l3
-                      do m4 = -l4 , l4
-                        do l = 0, 4 
-                          if (gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)  .ne. 0.0d0) then
-                            index_l(ind)=l
-                            index_l1(ind)=l1
-                            index_l2(ind)=l2
-                            index_l3(ind)=l3
-                            index_l4(ind)=l4
-                            index_m1(ind)=m1
-                            index_m2(ind)=m2
-                            index_m3(ind)=m3
-                            index_m4(ind)=m4
-                            !GR(l,l1,l2,l3,l4,m1,m2,m3,m4)=gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-                            ind=ind+1
-                          end if 
+                do l = 0, 4 
+                  aux=0
+                  do m1 = -l1 , l1
+                    do m2 = -l2 , l2
+                      do m3 = -l3 , l3
+                        do m4 = -l4 , l4
+                          aux=aux+abs(gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4))
                         enddo
                       enddo
-                    enddo
+                    enddo 
                   enddo
-                enddo
-               enddo
-             enddo
-          enddo
-        enddo
+                  indtot=indtot+1
+                  if (aux .ne. 0.0d0) then
+                    index_l(ind)=l
+                    index_l1(ind)=l1
+                    index_l2(ind)=l2
+                    index_l3(ind)=l3
+                    index_l4(ind)=l4
+                    ind=ind+1
+                    write(*,'(4I5)') l1,l2,l3,l4
+                  end if 
+                enddo !l
+              enddo !l4
+            enddo !l3
+          enddo !l2
+        enddo !l1
 
-         
-
-       allocate (R (index_max_l)) 
        do in1 = 1, nspec
         write (36,400) in1, nsshxc(in1)
         drho = drr_rho(in1) 
@@ -260,18 +252,22 @@
         l2=index_l2(ind)
         l3=index_l3(ind)
         l4=index_l4(ind)
-        m1=index_m1(ind)
-        m2=index_m2(ind)
-        m3=index_m3(ind)
-        m4=index_m4(ind)
-        answer(ind)=R(ind)*                                                        &
-         & gauntReal(index_l(ind),index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind))
+        answer(ind)=0.0d0
+        do m1 = -l1 , l1
+          do m2 = -l2 , l2
+            do m3 = -l3 , l3
+              do m4 = -l4 , l4
+                  answer(ind)=answer(ind)+R(ind)*gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
+              enddo
+            enddo
+          enddo 
+        enddo
+         write(*,'(4I5,2x,F10.8)') index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),answer(ind)
         end do !ind
 
        do ind = 0, index_max
-         write(36,'(8I5,2x,2F10.8)') index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind), &
-                                  & index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind), &
-                                  & answer(ind),gauntReal(index_l(ind),index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),index_m1(ind),index_m2(ind),index_m3(ind),index_m4(ind))
+         write(36,'(4I5,2x,F10.8)') index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),answer(ind)
+         write(*,'(4I5,2x,F10.8)') index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),answer(ind)
        end do 
 
        write (36,*) '  '
@@ -282,7 +278,16 @@
        close (unit = 36)
 
 ! Deallocate Arrays
-! ===========================================================================
+       deallocate (index_l)
+       deallocate (index_l1)
+       deallocate (index_l2)
+       deallocate (index_l3)
+       deallocate (index_l4)
+       write (*,*) ' ................ 10 ..... '
+       deallocate (answer)
+       write (*,*) ' ................ 11 ..... '
+       deallocate (R)
+       write (*,*) ' ................ 12 ..... '
  
 ! Format Statements
 ! ===========================================================================
