@@ -40,261 +40,209 @@
 ! ===========================================================================
 !
 ! ===========================================================================
-! Code written by:
-! Dani y JOM 
+! Code written iy:
+! Dani i JOM 
 ! ===========================================================================
 !
 ! Program Declaration
 ! ===========================================================================
-        subroutine onecentervdip (nspec, nspec_max, fraction, nsshxc,    &
-     &                           rcutoffa_max,  what, signature,drr_rho)
-        use constants
+        subroutine onecentervdip (nsh_max, nspec, nspec_max, fraction, nsshxc,&
+     &                   lsshxc, drr_rho, rcutoffa_max, what, signature)
         implicit none
 
 ! Argument Declaration and Description
 ! ===========================================================================
 ! Input
+        integer, intent (in) :: nsh_max
         integer, intent (in) :: nspec
         integer, intent (in) :: nspec_max
 
+        integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
         integer, intent (in), dimension (nspec_max) :: nsshxc
- 
+
         real*8, intent (in) :: fraction
-        real*8, intent (in), dimension (nspec_max) :: rcutoffa_max
+
         real*8, intent (in), dimension (nspec_max) :: drr_rho
-        character (len=70), intent (in) :: signature
+        real*8, intent (in), dimension (nspec_max) :: rcutoffa_max
+
+        character (len=70)  :: signature
+
         character (len=70), intent (in), dimension (nspec_max) :: what
- 
+
+
 ! Output
- 
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
+!        integer, parameter :: lmax = 1
+        real*8, parameter :: eq2 = 14.39975d0
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        integer in1
+        integer irho
+        integer irhop
+        integer issh
+        integer itype
+        integer jssh
+        integer lalpha
+        integer lmu
+        integer lqn
+        integer malpha
+        integer mmu
+        integer mqn
         integer nnrho
-        integer irho1,irho2,ind,indtot
-        real*8 rho1,rho2 
+
+        real*8 coefficient
+        real*8 cg1
+        real*8 cg2
+        real*8 cg3
+        real*8 cg4
         real*8 drho
-        real*8 factor1
-        real*8 factor2
-        real*8 rcutoff
-        real*8 rho
-        real*8 rhomin
+        real*8 psi1
+        real*8 psi2
+        real*8 psi3
+        real*8 psi4
+        real*8 r
+        real*8 rp
         real*8 rhomax
+        real*8 rhomin
+        real*8 sumr
+        real*8 sumrp
         real*8 aux
- 
+
+!        real*8, dimension (-lmax:lmax) :: answer
+        real*8, dimension (:), allocatable :: factor
+        real*8, dimension (:), allocatable :: rpoint
+
+        real*8, external :: clebsch_gordon
+        real*8, external :: psiofr
+
+
+
         integer :: index_max
         integer, dimension (:), allocatable :: index_l
         integer, dimension (:), allocatable :: index_l1
         integer, dimension (:), allocatable :: index_l2
         integer, dimension (:), allocatable :: index_l3
         integer, dimension (:), allocatable :: index_l4
-        real*8, dimension (:), allocatable :: answer
-        
-        real*8, dimension (:), allocatable :: R
- 
-        real*8, external :: psiofr
 
-        integer, parameter :: lmax = 1
         integer :: l,l1,l2,l3,l4,m1,m2,m3,m4
-        real*8 :: gauntReal
+        real*8 ::gauntReal
+
+
+
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
         open (unit = 36, file = 'coutput/vdip_onecenter.dat',                &
      &        status = 'unknown')
+
  
 ! Set up the header for the output file.
         write (36,100)
-        write (36,*) ' All one center matrix elements '
-        write (36,*) ' created by: '
-        write (36,200) signature
+        write (36,*) ' All one center matrix elements created by: '
+!        write (36,200) signature
  
-        do in1 = 1, nspec
-         write (36,300) what(in1)
+        do itype = 1, nspec
+         write (36,300) what(itype)
         end do
         write (36,100)
  
-
-! ===========================================================================
-        ind=-1
-        indtot=-1
-        write(*,*) 'l,l1,l2,l3,l4,m1,m2,m3,m4,gauntReal'
-        do l1 = 0 , lmax
-          do l2 = 0 , lmax
-            do l3 = 0 , lmax
-              do l4 = 0 , lmax
-                do l = 0, 4 
-                  aux=0
-                  do m1 = -l1 , l1
-                    do m2 = -l2 , l2
-                      do m3 = -l3 , l3
-                        do m4 = -l4 , l4
-                          aux=aux+abs(gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4))
-                        enddo
-                      enddo
-                    enddo 
-                  enddo
-                  indtot=indtot+1
-                  if (aux .ne. 0.0d0) then
-                    ind=ind+1
-                    ! write(*,'(9I5,2x,F10.8)') l, l1,l2,l3,l4,m1,m2,m3,m4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-                  !   write(*,'(5I5,2x,F10.8)') l, l1,l2,l3,l4,gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-                  end if 
-                enddo !l
-              enddo !l4
-            enddo !l3
-          enddo !l2
-        enddo !l1
-        write(*,*) 'hay ',ind, ' diferentes de ',indtot
-        index_max=ind
-       
-        allocate (index_l (index_max)) !nos da los que son diferentes de 0 logical
-        allocate (index_l1 (index_max)) 
-        allocate (index_l2 (index_max)) 
-        allocate (index_l3 (index_max))
-        allocate (index_l4 (index_max))
-        allocate (answer (index_max))
-        allocate (R(index_max))
-        ind=0
-         do l1 = 0 , lmax
-          do l2 = 0 , lmax
-            do l3 = 0 , lmax
-              do l4 = 0 , lmax
-                do l = 0, 4 
-                  aux=0
-                  do m1 = -l1 , l1
-                    do m2 = -l2 , l2
-                      do m3 = -l3 , l3
-                        do m4 = -l4 , l4
-                          aux=aux+abs(gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4))
-                        enddo
-                      enddo
-                    enddo 
-                  enddo
-                  indtot=indtot+1
-                  if (aux .ne. 0.0d0) then
-                    index_l(ind)=l
-                    index_l1(ind)=l1
-                    index_l2(ind)=l2
-                    index_l3(ind)=l3
-                    index_l4(ind)=l4
-                    ind=ind+1
-                    write(*,'(4I5)') l1,l2,l3,l4
-                  end if 
-                enddo !l
-              enddo !l4
-            enddo !l3
-          enddo !l2
-        enddo !l1
-
-       do in1 = 1, nspec
-        write (36,400) in1, nsshxc(in1)
-        drho = drr_rho(in1) 
-        rhomin = 0.0d0
-        rhomax = rcutoffa_max(in1)  
-        nnrho = nint((rhomax - rhomin)/drho) + 1
-
-! Here we loop over rho.
-          
-!         do irho1= 1, nnrho
-!           rho1 = rhomin + dfloat(irho1 - 1)*drho
-!           write(36,*) irho1,rho1,psiofr(in1,1,rho1)
-!         end do
-
-
-        do irho1= 1, nnrho
-          rho1 = rhomin + dfloat(irho1 - 1)*drho
-
-          factor1 = 2.0d0*drho/3.0d0
-          if (mod(irho1, 2) .eq. 0) factor1 = 4.0d0*drho/3.0d0
-          if (irho1 .eq. 1 .or. irho1 .eq. nnrho) factor1 = drho/3.0d0
-
-          do irho2= 1, nnrho 
-            rho2 = rhomin + dfloat(irho2 - 1)*drho
-
-            factor2 = 2.0d0*drho/3.0d0
-            if (mod(irho2, 2) .eq. 0) factor2 = 4.0d0*drho/3.0d0
-            if (irho2 .eq. 1 .or. irho2 .eq. irho1) factor2 = drho/3.0d0
-
-            if (rho1 .lt. 1.0d-04) rho1 = 1.0d-04
-
-            do ind = 0, index_max
-              l=index_l(ind)
-              l1=index_l1(ind)
-              l2=index_l2(ind)
-              l3=index_l3(ind)
-              l4=index_l4(ind)
-              if (irho2 .le. irho1 ) then
-                R(ind)=R(ind)+                                                      &
-                & + factor1*rho1**(1-l)*(psiofr(in1,l1,rho1)*psiofr(in1,l2,rho1))*  &
-                &   factor2*rho2**(2+l)*(psiofr(in1,l3,rho2)*psiofr(in1,l4,rho2))
-              else 
-                R(ind)=R(ind)+                                                      &
-                & + factor1*rho1**(2+l)*(psiofr(in1,l1,rho1)*psiofr(in1,l2,rho1))*  &
-                &   factor2*rho2**(1-l)*(psiofr(in1,l3,rho2)*psiofr(in1,l4,rho2))
-              end if
-            end do !ind
-          end do !rho1
-        end do !rho2
-       end do !nspec
-
-
-!I(l1,l2,l3,l4,m1,m2,m3,m4) =I(li,mi) =SUM_L (4pi/(2l+ 1)) * R(l,li) * GR(l,li,mi)
-! GR(l,l1,l2,l3,l4,m1,m2,m3,m4)=gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-
-       do ind = 0, index_max
-        l=index_l(ind)
-        l1=index_l1(ind)
-        l2=index_l2(ind)
-        l3=index_l3(ind)
-        l4=index_l4(ind)
-        answer(ind)=0.0d0
-        do m1 = -l1 , l1
-          do m2 = -l2 , l2
-            do m3 = -l3 , l3
-              do m4 = -l4 , l4
-                  answer(ind)=answer(ind)+R(ind)*gauntReal(l,l1,l2,l3,l4,m1,m2,m3,m4)
-              enddo
-            enddo
-          enddo 
-        enddo
-         write(*,'(4I5,2x,F10.8)') index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),answer(ind)
-        end do !ind
-
-       do ind = 0, index_max
-         write(36,'(4I5,2x,F10.8)') index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),answer(ind)
-         write(*,'(4I5,2x,F10.8)') index_l1(ind),index_l2(ind),index_l3(ind),index_l4(ind),answer(ind)
-       end do 
-
-       write (36,*) '  '
-       write (*,*) '  '
-       write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
-       write (*,*) '  '
-
-       close (unit = 36)
-
-! Deallocate Arrays
-       deallocate (index_l)
-       deallocate (index_l1)
-       deallocate (index_l2)
-       deallocate (index_l3)
-       deallocate (index_l4)
-       write (*,*) ' ................ 10 ..... '
-       deallocate (answer)
-       write (*,*) ' ................ 11 ..... '
-       deallocate (R)
-       write (*,*) ' ................ 12 ..... '
+        do itype = 1, nspec
  
-! Format Statements
+! Initialize the limits of integration for the radial integral.
+! Set up the grid points for the rho integration.
+         rhomin = 0.0d0
+         rhomax = rcutoffa_max(itype)
+         drho = drr_rho(itype)
+         nnrho = int((rhomax - rhomin)/drho) + 1
+ 
+         allocate (rpoint(nnrho))
+         allocate (factor(nnrho))
+         do irho = 1, nnrho
+          rpoint(irho) = float(irho - 1)*drho
+! Set up the Simpson rule factors:
+          factor(irho) = 2.0d0*drho/3.0d0
+          if (mod(irho,2) .eq. 0) factor(irho) = 4.0d0*drho/3.0d0
+          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0d0
+         end do !irho
+ 
+
+         do l1 = 0 , nsshxc(itype)
+          do l2 = 0 , nsshxc(itype)
+           do l3 = 0 , nsshxc(itype)
+            do l4 = 0 , nsshxc(itype)
+             do lqn = 0, 4
+              aux=0
+              do m1 = -l1 , l1
+               do m2 = -l2 , l2
+                do m3 = -l3 , l3
+                 do m4 = -l4 , l4
+                  aux=aux+abs(gauntReal(lqn,l1,l2,l3,l4,m1,m2,m3,m4))
+                 enddo
+                enddo
+               enddo 
+              enddo
+! Perform the radial integration. Only do this integral if the
+! coefficient is
+! non-zero.
+              if (aux .gt. 1.0d-4) then
+ 
+! First integrate the even pieces and then the odd pieces
+              sumr = 0.0d0
+              do irho = 1, nnrho
+               r = rpoint(irho)
+               if (r .lt. 1.0d-04) r = 1.0d-04
+                psi1 = psiofr(itype,l1,r)
+                psi2 = psiofr(itype,l2,r)
+ 
+! ****************************************************************************
+! Perform the radial integration over r'.
+! Limits from 0 to r.
+                sumrp = 0.0d0
+                do irhop = 1, nnrho
+                 rp = rpoint(irhop)
+                 if (rp .lt. 1.0d-04) rp = 1.0d-04
+                 psi3 = psiofr(itype,l3,rp)
+                 psi4 = psiofr(itype,l4,rp)
+                 if (rp .le. r) then
+                  sumrp = sumrp + factor(irhop)*psi3*psi4*rp**(lqn + 2)/r**(lqn + 1)   ! Limits from 0 to rcutoff.
+                 else
+                  sumrp = sumrp + factor(irhop)*psi3*psi4*r**lqn/rp**(lqn - 1)
+                 end if
+                end do !irhop
+! ****************************************************************************
+                sumr = sumr + factor(irho)*sumrp*psi1*psi2*r**2  !*coefficient
+               end do !irho
+ 
+               write (36,'(5I4,2x,2F12.8)') lqn,l1,l2,l3,l4,sumr,(eq2/2.0d0)*fraction*sumr
+                             !answer(malpha) = answer(malpha) + (eq2/2.0d0)*fraction*sumr
+              end if !(aux .gt. 1.0d-4)
+             end do !lqn
+            enddo !l4
+           enddo !l3
+          enddo !l2
+         enddo !l1
+ 
+! ****************************************************************************
+
+! End loop over the species.
+         deallocate (rpoint)
+         deallocate (factor)
+        end do
+
+        write (36,*) '  '
+        write (*,*) '  '
+        write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
+        write (*,*) '  '
+        close (unit = 36)
+
+! Format itatements
 ! ===========================================================================
 100     format (70('='))
 200     format (2x, a45)
 300     format (a70)
-400     format (2x, i3, 2x, i3)
-500     format (8d20.10)
+400     format (8d20.10)
+ 
         return
         end

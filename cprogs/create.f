@@ -575,10 +575,12 @@
         end if ! end master
  
 
-! -------- 
-          call onecentervdip (nspec, nspec_max,fraction, nsshxc, 
-     1                    rcutoffa_max, what, signature, drr_rho)
-
+!          call onecentervdip (nspec, nspec_max, nsh_max, wfmax_points, 
+!     1                      iexc, fraction, nsshxc, lsshxc, 
+!     2                      rcutoffa_max, xnocc, dqorb, iderorb, what, 
+!     3                      signature, drr_rho, dqint)
+          call onecentervdip (nsh_max, nspec, nspec_max, fraction, nssh, lssh,
+     1               drr_rho, rcutoffa_max, what, signature)
 
 ! ======================================================================
 ! I. Perform three-center calculations
