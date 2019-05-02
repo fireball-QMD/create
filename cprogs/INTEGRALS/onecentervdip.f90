@@ -46,7 +46,7 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        subroutine onecentervdip (nsh_max, nspec, nspec_max, fraction, nsshxc,&
+        subroutine onecentervdip (nsh_max, nspec, nspec_max, fraction, nsshxc,    &
      &                   lsshxc, drr_rho, rcutoffa_max, what, signature)
         implicit none
 
@@ -65,16 +65,16 @@
         real*8, intent (in), dimension (nspec_max) :: drr_rho
         real*8, intent (in), dimension (nspec_max) :: rcutoffa_max
 
-        character (len=70)  :: signature
 
         character (len=70), intent (in), dimension (nspec_max) :: what
+
+        character (len=70), intent (in) :: signature
 
 
 ! Output
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
-!        integer, parameter :: lmax = 1
         real*8, parameter :: eq2 = 14.39975d0
  
 ! Local Variable Declaration and Description
@@ -110,21 +110,10 @@
         real*8 sumrp
         real*8 aux
 
-!        real*8, dimension (-lmax:lmax) :: answer
         real*8, dimension (:), allocatable :: factor
         real*8, dimension (:), allocatable :: rpoint
 
-        real*8, external :: clebsch_gordon
         real*8, external :: psiofr
-
-
-
-        integer :: index_max
-        integer, dimension (:), allocatable :: index_l
-        integer, dimension (:), allocatable :: index_l1
-        integer, dimension (:), allocatable :: index_l2
-        integer, dimension (:), allocatable :: index_l3
-        integer, dimension (:), allocatable :: index_l4
 
         integer :: l,l1,l2,l3,l4,m1,m2,m3,m4
         real*8 ::gauntReal
@@ -140,9 +129,9 @@
  
 ! Set up the header for the output file.
         write (36,100)
-        write (36,*) ' All one center matrix elements created by: '
-!        write (36,200) signature
- 
+        write (36,*) ' All one center matrix elements created by:'
+        write (36,200) signature
+
         do itype = 1, nspec
          write (36,300) what(itype)
         end do
@@ -156,6 +145,7 @@
          rhomax = rcutoffa_max(itype)
          drho = drr_rho(itype)
          nnrho = int((rhomax - rhomin)/drho) + 1
+
  
          allocate (rpoint(nnrho))
          allocate (factor(nnrho))
@@ -188,6 +178,15 @@
 ! non-zero.
               if (aux .gt. 1.0d-4) then
  
+              do irho = 1, nnrho
+               r = rpoint(irho)
+               if (r .lt. 1.0d-04) r = 1.0d-04
+                psi1 = psiofr(itype,l1,r)
+                psi2 = psiofr(itype,l2,r)
+             !  write(36,*)irho,r,psi1,l1,psi2,l2
+             end do
+
+
 ! First integrate the even pieces and then the odd pieces
               sumr = 0.0d0
               do irho = 1, nnrho
@@ -210,12 +209,15 @@
                  else
                   sumrp = sumrp + factor(irhop)*psi3*psi4*r**lqn/rp**(lqn - 1)
                  end if
-                end do !irhop
+!                if (sumr .gt. 1.0d-04 ) then
+!                    write(36,'(10F14.10)')  sumr, psi1,psi2,r,sumrp,psi3,psi3,rp
+!                end if
+                end do !rhop
 ! ****************************************************************************
                 sumr = sumr + factor(irho)*sumrp*psi1*psi2*r**2  !*coefficient
                end do !irho
  
-               write (36,'(5I4,2x,2F12.8)') lqn,l1,l2,l3,l4,sumr,(eq2/2.0d0)*fraction*sumr
+               write (36,'("itype = ",I2,", l = ",I2,", li = (",4I2,")",2x,", sumr =",F14.10)') itype,lqn,l1,l2,l3,l4,sumr
                              !answer(malpha) = answer(malpha) + (eq2/2.0d0)*fraction*sumr
               end if !(aux .gt. 1.0d-4)
              end do !lqn
@@ -225,7 +227,6 @@
          enddo !l1
  
 ! ****************************************************************************
-
 ! End loop over the species.
          deallocate (rpoint)
          deallocate (factor)

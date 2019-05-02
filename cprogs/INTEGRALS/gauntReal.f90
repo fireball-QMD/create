@@ -85,8 +85,10 @@
         do m=-l,l
           gauntComplex = gauntComplex + ((-1)**m)*YXX(l,l1,l2,-m,m1,m2)*YXX(l,l3,l4,m,m3,m4)
         end do
-!poner un warning
-!!!!!!-------------------------------------------------------------------------------------------------------------------------------------------------
+        if (abs(aimag(gauntComplex)) .gt. 1.0d-04 ) then 
+         write (*,*) 'sum_m {YXX*YXX}, l1,l2,m1,m2,l3,l4,m3,m4 =',l1,l2,m1,m2,l3,l4,m3,m4 
+         write (*,*) 'Warning function gauntReal it is not real',gauntComplex
+        end if
         gauntReal = REAL(gauntComplex)
         return 
         end function gauntReal
