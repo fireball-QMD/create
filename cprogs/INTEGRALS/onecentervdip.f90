@@ -116,6 +116,7 @@
         real*8, external :: psiofr
 
         integer :: l,l1,l2,l3,l4,m1,m2,m3,m4
+        integer :: il1,il2,il3,il4
         real*8 ::gauntReal
 
 
@@ -145,10 +146,23 @@
          rhomax = rcutoffa_max(itype)
          drho = drr_rho(itype)
          nnrho = int((rhomax - rhomin)/drho) + 1
-
- 
          allocate (rpoint(nnrho))
          allocate (factor(nnrho))
+
+
+!test 
+!         do il1 = 1 , nsshxc(itype)
+!          l1=lsshxc(itype,il1)
+!         write(36,*)'itype =',itype,'l =',l1 
+!         do irho = 1, nnrho
+!           r = rpoint(irho)
+!           if (r .lt. 1.0d-04) r = 1.0d-04
+!           psi1 = psiofr(itype,il1,r)
+!           write(36,*)irho,r,psi1
+!         end do
+!         end do
+
+ 
          do irho = 1, nnrho
           rpoint(irho) = float(irho - 1)*drho
 ! Set up the Simpson rule factors:
@@ -158,10 +172,14 @@
          end do !irho
  
 
-         do l1 = 0 , nsshxc(itype)
-          do l2 = 0 , nsshxc(itype)
-           do l3 = 0 , nsshxc(itype)
-            do l4 = 0 , nsshxc(itype)
+         do il1 = 1 , nsshxc(itype)
+          l1=lsshxc(itype,il1)
+          do il2 = 1 , nsshxc(itype)
+           l2=lsshxc(itype,il2)
+           do il3 = 1 , nsshxc(itype)
+            l3=lsshxc(itype,il3)
+            do il4 = 1 , nsshxc(itype)
+             l4=lsshxc(itype,il4)
              do lqn = 0, 4
               aux=0
               do m1 = -l1 , l1
@@ -177,23 +195,14 @@
 ! coefficient is
 ! non-zero.
               if (aux .gt. 1.0d-4) then
- 
-              do irho = 1, nnrho
-               r = rpoint(irho)
-               if (r .lt. 1.0d-04) r = 1.0d-04
-                psi1 = psiofr(itype,l1,r)
-                psi2 = psiofr(itype,l2,r)
-             !  write(36,*)irho,r,psi1,l1,psi2,l2
-             end do
-
 
 ! First integrate the even pieces and then the odd pieces
               sumr = 0.0d0
               do irho = 1, nnrho
                r = rpoint(irho)
                if (r .lt. 1.0d-04) r = 1.0d-04
-                psi1 = psiofr(itype,l1,r)
-                psi2 = psiofr(itype,l2,r)
+                psi1 = psiofr(itype,il1,r)
+                psi2 = psiofr(itype,il2,r)
  
 ! ****************************************************************************
 ! Perform the radial integration over r'.
@@ -202,8 +211,8 @@
                 do irhop = 1, nnrho
                  rp = rpoint(irhop)
                  if (rp .lt. 1.0d-04) rp = 1.0d-04
-                 psi3 = psiofr(itype,l3,rp)
-                 psi4 = psiofr(itype,l4,rp)
+                 psi3 = psiofr(itype,il3,rp)
+                 psi4 = psiofr(itype,il4,rp)
                  if (rp .le. r) then
                   sumrp = sumrp + factor(irhop)*psi3*psi4*rp**(lqn + 2)/r**(lqn + 1)   ! Limits from 0 to rcutoff.
                  else
