@@ -35,260 +35,224 @@
 ! You should have received a copy of the GNU General Public License
 ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-!
-! onecenternuxc.f90
+! onecentervdip.f90  
 ! Program Description
 ! ===========================================================================
-!       This routine calculates the one-center integrals for the exchange-
-! correlation interactions of the extended Hubbard model.
-!
-!   int [n(ishell)n(jshell) Nuxc(natom)]
 !
 ! ===========================================================================
-! Code written by:
-! James P. Lewis
-! Department of Physics and Astronomy
-! Brigham Young University
-! N233 ESC P.O. Box 24658 
-! Provo, UT 841184602-4658
-! FAX 801-422-2265
-! Office telephone 801-422-7444
+! Code written iy:
+! Dani i JOM 
 ! ===========================================================================
 !
 ! Program Declaration
 ! ===========================================================================
-        subroutine onecenternuxc (nspec, nspec_max, nsh_max, wfmax_points,   &
-     &                            iexc, fraction, nsshxc, rcutoffa_max,      &
-     &                            xnocc, dqorb, iderorb, what, signature,    &
-     &                            drr_rho)
-        use constants
+        subroutine onecentervdip (nsh_max, nspec, nspec_max, fraction, nsshxc,    &
+     &                   lsshxc, drr_rho, rcutoffa_max, what, signature)
         implicit none
 
-
-!rcutoffa_max necesitamos que sea rcutoffa_min,
-
-
- 
 ! Argument Declaration and Description
 ! ===========================================================================
 ! Input
-        integer, intent (in) :: iexc
         integer, intent (in) :: nsh_max
-        /integer, intent (in) :: nspec
+        integer, intent (in) :: nspec
         integer, intent (in) :: nspec_max
-        integer, intent (in) :: wfmax_points
 
-        integer, intent (in), dimension (nspec_max) :: iderorb
+        integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
         integer, intent (in), dimension (nspec_max) :: nsshxc
- 
+
         real*8, intent (in) :: fraction
- 
-        real*8, intent (in), dimension (nspec_max) :: dqorb
+
         real*8, intent (in), dimension (nspec_max) :: drr_rho
         real*8, intent (in), dimension (nspec_max) :: rcutoffa_max
-        real*8, intent (in), dimension (nsh_max, nspec_max) :: xnocc
- 
-        character (len=70), intent (in) :: signature
+
 
         character (len=70), intent (in), dimension (nspec_max) :: what
- 
+
+        character (len=70), intent (in) :: signature
+
+
 ! Output
- 
  
 ! Local Parameters and Data Declaration
 ! ===========================================================================
+        real*8, parameter :: eq2 = 14.39975d0
  
 ! Local Variable Declaration and Description
 ! ===========================================================================
-        integer ideriv
-        integer in1
         integer irho
+        integer irhop
         integer issh
+        integer itype
         integer jssh
+        integer lalpha
+        integer lmu
+        integer lqn
+        integer malpha
+        integer mmu
+        integer mqn
         integer nnrho
-        integer nssh
- 
-        real*8 dnuxc
-        real*8 dnuxcs
-        real*8 dq
+
+        real*8 coefficient
+        real*8 cg1
+        real*8 cg2
+        real*8 cg3
+        real*8 cg4
         real*8 drho
-        real*8 exc
-        real*8 dexc
-        real*8 factor
-        real*8 rcutoff
-        real*8 rho
-        real*8 rhomin
+        real*8 psi1
+        real*8 psi2
+        real*8 psi3
+        real*8 psi4
+        real*8 r
+        real*8 rp
         real*8 rhomax
-        real*8 rh
-        real*8 rhp
-        real*8 rhpp
-        real*8 vxc
- 
-        real*8, dimension (:, :), allocatable :: answer
-        real*8, dimension (:), allocatable :: rho1c
-        real*8, dimension (:), allocatable :: rhop1c
-        real*8, dimension (:), allocatable :: rhopp1c
-        real*8, dimension (:), allocatable :: xnocc_in
- 
+        real*8 rhomin
+        real*8 sumr
+        real*8 sumrp
+        real*8 aux
+
+        real*8, dimension (:), allocatable :: factor
+        real*8, dimension (:), allocatable :: rpoint
+
         real*8, external :: psiofr
- 
+
+        integer :: l,l1,l2,l3,l4,m1,m2,m3,m4
+        integer :: il1,il2,il3,il4
+        real*8 ::gauntReal
+
+
+
 ! Procedure
 ! ===========================================================================
 ! Open the file to store the onecenter data.
-        open (unit = 36, file = 'coutput/nuxc_onecenter.dat',                &
+        open (unit = 36, file = 'coutput/vdip_onecenter.dat',                &
      &        status = 'unknown')
+
  
 ! Set up the header for the output file.
         write (36,100)
-        write (36,*) ' All one center matrix elements '
-        write (36,*) ' created by: '
+        write (36,*) ' All one center matrix elements created by:'
         write (36,200) signature
- 
-        do in1 = 1, nspec
-         write (36,300) what(in1)
+
+        do itype = 1, nspec
+         write (36,300) what(itype)
         end do
         write (36,100)
  
-! Loop over the different charge types (0, -1, or +1).
-        ideriv = 0
+        do itype = 1, nspec
  
-! Loop over the species
-        allocate (rho1c (wfmax_points))
-        allocate (rhop1c (wfmax_points))
-        allocate (rhopp1c (wfmax_points))
-        do in1 = 1, nspec
-         nssh = nsshxc(in1)
-         write (36,400) in1, nssh
- 
-! Needed for charge corrections:
-         dq = dqorb(in1)
-         jssh = iderorb(in1)
- 
-         drho = drr_rho(in1)
-         rcutoff = rcutoffa_min(in1) !, rcutoffa_max(in1)
-         allocate (xnocc_in (nssh))
-         xnocc_in(1:nssh) = xnocc(1:nssh,in1)
- 
-! Obtain the density and respective derivatives needed for evaluating the
-! exchange-correlation interactions (LDA or GGA).
-         call rho1c_store (in1, nsh_max, nssh, dq, jssh, drho, rcutoff,      &
-     &                     xnocc_in, ideriv + 1, wfmax_points, rho1c, rhop1c,&
-     &                     rhopp1c)
- 
-! Integrals <i|exc(i)-mu(i)|i> and <i.nu|mu(i)|i.nu'>
-! ***************************************************************************
-! First initialize the answer array
-         
-         allocate (index_l (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l1 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l2 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l3 (index_max)) !nos da los que son diferentes de 0 logical
-         allocate (index_l4 (index_max)) !nos da los que son diferentes de 0 logical
-         !cargar 
-
-
-         allocate (answer  (index_max))
-         allocate (answer1 (index_max))
-         allocate (answer2 (index_max))
-         answer1 = 0.0d0
-         answer2 = 0.0d0
- 
-! Fix the endpoints and initialize the increments dz and drho.
+! Initialize the limits of integration for the radial integral.
+! Set up the grid points for the rho integration.
          rhomin = 0.0d0
-         rhomax = rcutoff  ! es el minimo...
+         rhomax = rcutoffa_max(itype)
+         drho = drr_rho(itype)
+         nnrho = int((rhomax - rhomin)/drho) + 1
+         allocate (rpoint(nnrho))
+         allocate (factor(nnrho))
+
+
+!test 
+!         do il1 = 1 , nsshxc(itype)
+!          l1=lsshxc(itype,il1)
+!         write(36,*)'itype =',itype,'l =',l1 
+!         do irho = 1, nnrho
+!           r = rpoint(irho)
+!           if (r .lt. 1.0d-04) r = 1.0d-04
+!           psi1 = psiofr(itype,il1,r)
+!           write(36,*)irho,r,psi1
+!         end do
+!         end do
+
  
-         nnrho = nint((rhomax - rhomin)/drho) + 1
+         do irho = 1, nnrho
+          rpoint(irho) = float(irho - 1)*drho
+! Set up the Simpson rule factors:
+          factor(irho) = 2.0d0*drho/3.0d0
+          if (mod(irho,2) .eq. 0) factor(irho) = 4.0d0*drho/3.0d0
+          if (irho .eq. 1 .or. irho .eq. nnrho) factor(irho) = drho/3.0d0
+         end do !irho
  
-! Here we loop over rho.
-       
-         do irho1= 1, nnrho
-         rho1 = rhomin + dfloat(irho1 - 1)*drho
-         do irho2= 1, irho1 !ojo com =1 .. puede ser 2
-          rho2 = rhomin + dfloat(irho2 - 1)*drho
+
+         do il1 = 1 , nsshxc(itype)
+          l1=lsshxc(itype,il1)
+          do il2 = 1 , nsshxc(itype)
+           l2=lsshxc(itype,il2)
+           do il3 = 1 , nsshxc(itype)
+            l3=lsshxc(itype,il3)
+            do il4 = 1 , nsshxc(itype)
+             l4=lsshxc(itype,il4)
+             do lqn = 0, 4
+              aux=0
+              do m1 = -l1 , l1
+               do m2 = -l2 , l2
+                do m3 = -l3 , l3
+                 do m4 = -l4 , l4
+                  aux=aux+abs(gauntReal(lqn,l1,l2,l3,l4,m1,m2,m3,m4))
+                 enddo
+                enddo
+               enddo 
+              enddo
+! Perform the radial integration. Only do this integral if the
+! coefficient is
+! non-zero.
+              if (aux .gt. 1.0d-4) then
+
+! First integrate the even pieces and then the odd pieces
+              sumr = 0.0d0
+              do irho = 1, nnrho
+               r = rpoint(irho)
+               if (r .lt. 1.0d-04) r = 1.0d-04
+                psi1 = psiofr(itype,il1,r)
+                psi2 = psiofr(itype,il2,r)
  
-          factor = 2.0d0*drho/3.0d0
-          if (mod(irho, 2) .eq. 0) factor = 4.0d0*drho/3.0d0
-          if (irho .eq. 1 .or. irho .eq. nnrho) factor = drho/3.0d0
+! ****************************************************************************
+! Perform the radial integration over r'.
+! Limits from 0 to r.
+                sumrp = 0.0d0
+                do irhop = 1, nnrho
+                 rp = rpoint(irhop)
+                 if (rp .lt. 1.0d-04) rp = 1.0d-04
+                 psi3 = psiofr(itype,il3,rp)
+                 psi4 = psiofr(itype,il4,rp)
+                 if (rp .le. r) then
+                  sumrp = sumrp + factor(irhop)*psi3*psi4*rp**(lqn + 2)/r**(lqn + 1)   ! Limits from 0 to rcutoff.
+                 else
+                  sumrp = sumrp + factor(irhop)*psi3*psi4*r**lqn/rp**(lqn - 1)
+                 end if
+!                if (sumr .gt. 1.0d-04 ) then
+!                    write(36,'(10F14.10)')  sumr, psi1,psi2,r,sumrp,psi3,psi3,rp
+!                end if
+                end do !rhop
+! ****************************************************************************
+                sumr = sumr + factor(irho)*sumrp*psi1*psi2*r**2  !*coefficient
+               end do !irho
  
-! Compute the exchange correlation potential
-!          rh = rho1c(irho)*abohr**3
-!          rhp = rhop1c(irho)*abohr**4
-!          rhpp = rhopp1c(irho)*abohr**5
-!          call get_potxc1c (iexc, fraction, rho, rh, rhp, rhpp, exc, vxc,    &
-!     &                      dnuxc, dnuxcs, dexc)
+               write (36,'("itype = ",I2,", l = ",I2,", li = (",4I2,")",2x,", sumr =",F14.10)') itype,lqn,l1,l2,l3,l4,sumr
+                             !answer(malpha) = answer(malpha) + (eq2/2.0d0)*fraction*sumr
+              end if !(aux .gt. 1.0d-4)
+             end do !lqn
+            enddo !l4
+           enddo !l3
+          enddo !l2
+         enddo !l1
  
-! Convert to eV
-!          dnuxc = dnuxc*Hartree*abohr**3
-  
-!          do issh = 1, nssh
-!           do jssh = 1, nssh
-!            answer(issh,jssh) = answer(issh,jssh)                            &
-!     &       + dnuxc*factor*rho**2*(psiofr(in1,issh,rho)**2)                 &
-!     &         *(psiofr(in1,jssh,rho)**2/(4.0d0*pi))
-!           end do
-!          end do
-          do ind = 1, index_max
-            l=index_l(ind)
-            l1=index_l1(ind)
-            l2=index_l2(ind)
-            l3=index_l3(ind)
-            l4=index_l4(ind)
-
-            answer1(ind) = answer1(ind)                       &
-     &       + factor1*rho1**(1-l)*(psiofr(in1,l1,rho1)*psiofr(in1,l2,rho1))*  &
-     &         factor2*rho2**(2+l)*(psiofr(in1,l3,rho2)*psiofr(in1,l4,rho2))
-
-           end do !ind
-         end do !rho1
-         end do !rho2
-
-
-         do irho1= 1, nnrho
-         rho1 = rhomin + dfloat(irho1 - 1)*drho
-          do irho2= (irho1+1), nnrho !pesar ....
-          rho2 = rhomin + dfloat(irho2 - 1)*drho
-           amswer2 .......
-         
-         end do
-         end do
-
-        I(l1,l2,l3,l4,m1,m2,m3,m4)=0
-        hacemos 8 loops y lo vamos sumando multiplicado por su gaunt
-        do l=0, 3
-        do ind = 1, index_max
-        if l = 
-        *(4.0d0*pi)/(2*l+1))
-           
-        enddo
-        enddo
-
-
-
-
-         do issh = 1, nssh
-          write (36,500) answer(issh,1:nssh)
-         end do
-         deallocate (xnocc_in)
-         deallocate (answer)
+! ****************************************************************************
+! End loop over the species.
+         deallocate (rpoint)
+         deallocate (factor)
         end do
- 
+
         write (36,*) '  '
         write (*,*) '  '
-        write (*,*) ' Writing output to: coutput/nuxc_onecenter.dat '
+        write (*,*) ' Writing output to: coutput/vdip_onecenter.dat '
         write (*,*) '  '
- 
         close (unit = 36)
 
-! Deallocate Arrays
-! ===========================================================================
-        deallocate (rho1c, rhop1c, rhopp1c)
- 
-! Format Statements
+! Format itatements
 ! ===========================================================================
 100     format (70('='))
 200     format (2x, a45)
 300     format (a70)
-400     format (2x, i3, 2x, i3)
-500     format (8d20.10)
+400     format (8d20.10)
+ 
         return
         end
