@@ -68,7 +68,8 @@ EXX = clebsch_gordon.o factorial.o setup_clm.o x_1c.o xatom_2c.o \
 INTERPOLATERS = interpolate2d.o psiofr.o rprimeofr.o vnnaofr.o vppofr.o buildspline_1d.o \
 		dpsiofr.o
 
-INTEGRALS = onecenterxc.o onecenternuxc.o onecenternuxcs.o mk_index.o \
+INTEGRALS = onecenterxc.o onecenternuxc.o onecenternuxcs.o onecentervdip.o \
+        gaunt.o gauntReal.o mk_index.o \
 	mk_indexPP.o mk_indexDipX.o mk_indexDipY.o rescaled_psi.o threecenter.o \
 	gleg.o  threecenter_integral.o twocenter.o twocenter_integral.o \
 	exc1crho.o nuxc1crho.o goverlap1c.o
@@ -210,6 +211,12 @@ vxc.o : XC/vxc.f parameters.inc wavefunctions.inc $(MODULES)
 # ****************************************************************************
 onecenterxc.o : INTEGRALS/onecenterxc.f90 $(MODULES)
 	$(F90) $(FFLAGS) -c INTEGRALS/onecenterxc.f90
+gauntReal.o : INTEGRALS/gauntReal.f90 $(MODULES)
+	$(F90) $(FFLAGS) -c INTEGRALS/gauntReal.f90
+gaunt.o : INTEGRALS/gaunt.f90 $(MODULES)
+	$(F90) $(FFLAGS) -c INTEGRALS/gaunt.f90
+onecentervdip.o : INTEGRALS/onecentervdip.f90 $(MODULES)
+	$(F90) $(FFLAGS) -c INTEGRALS/onecentervdip.f90
 onecenternuxc.o : INTEGRALS/onecenternuxc.f90 $(MODULES)
 	$(F90) $(FFLAGS) -c INTEGRALS/onecenternuxc.f90
 onecenternuxcs.o : INTEGRALS/onecenternuxcs.f90 $(MODULES)

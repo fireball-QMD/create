@@ -57,7 +57,7 @@
 !
 ! Program Declaration
 ! ===========================================================================
-        real function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
+        real*8 function gauntReal (l,l1,l2,l3,l4,m1,m2,m3,m4)
         implicit none
  
 ! Argument Declaration and Description
@@ -76,8 +76,8 @@
 ! Local Parameters and Data Declaration
 ! ===========================================================================
         integer :: m
-        complex :: YXX
-        complex :: gauntComplex
+        complex*8 :: YXX
+        complex*8 :: gauntComplex
  
 ! Procedure
 ! ===========================================================================
@@ -85,14 +85,17 @@
         do m=-l,l
           gauntComplex = gauntComplex + ((-1)**m)*YXX(l,l1,l2,-m,m1,m2)*YXX(l,l3,l4,m,m3,m4)
         end do
-
+        if (abs(aimag(gauntComplex)) .gt. 1.0d-04 ) then 
+         write (*,*) 'sum_m {YXX*YXX}, l1,l2,m1,m2,l3,l4,m3,m4 =',l1,l2,m1,m2,l3,l4,m3,m4 
+         write (*,*) 'Warning function gauntReal it is not real',gauntComplex
+        end if
         gauntReal = REAL(gauntComplex)
         return 
         end function gauntReal
 
 ! Program Declaration
 ! ===========================================================================
-        complex function YXX (l,l3,l4,m,m3,m4)
+        complex*8 function YXX (l,l3,l4,m,m3,m4)
         implicit none
  
 ! Argument Declaration and Description
@@ -104,8 +107,8 @@
         integer, intent (in) :: m
         integer, intent (in) :: m3
         integer, intent (in) :: m4
-        real :: aux
-        real :: gaunt
+        real*8 :: aux
+        real*8 :: gaunt
 ! Procedure
 ! ===========================================================================
         YXX=(0,0)
