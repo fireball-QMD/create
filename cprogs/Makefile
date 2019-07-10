@@ -26,7 +26,7 @@
 # Computer Software clause at 52.227-7013.
 
 #Pick your machine type: AIX, AIX_CHPC, ICEBOX, SGI
-MACHINE = ILINUX_beem
+MACHINE = ILINUX
 #Pick you parallel type: <blank for none>, MPI, MPICH
 METHOD = DEBUG
 #METHOD = OPT
