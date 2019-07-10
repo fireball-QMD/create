@@ -167,6 +167,7 @@
         integer nssh2
         integer nssh2PP
         integer nzx1, nzx2
+        integer itype
  
 !
 ! information relevant to the storage of the non-zero matrix elements
@@ -509,6 +510,20 @@
 ! ======================================================================
 
 ! O. Compute exchange one-center case.
+! **********************************************************************
+!
+!  =====>         4.5  Dipole???
+!
+! **********************************************************************
+          !if (V_intra_dip .eq. 1) then
+         write(*,*) 'nspec= ',nspec !Ankais
+          do itype = 1,nspec
+          write(*,*) 'itype= ', itype !Ankais
+          call onecentervdip (nsh_max, nspec, nspec_max, itype,
+     1               nssh, lssh, drr_rho, rcutoffa_max, what, signature)
+
+          end do !end do itype
+          !end if !end if (V_intra_dip .eq. 1) then 
 ! ======================================================================
 ! Only do this on the master
          if (imuxc1c .eq. 1) then
@@ -1015,18 +1030,6 @@
      5                      iammaster, ispher)
            end do
           end if
-
- 
-! **********************************************************************
-!
-!  =====>         4.5  Dipole???
-!
-! **********************************************************************
- 
-          call onecentervdip (nsh_max, nspec, nspec_max, fraction,nssh,
-     1               lssh, drr_rho, rcutoffa_max, what, signature)
-
-
 
  
 ! **********************************************************************

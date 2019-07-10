@@ -26,14 +26,30 @@
 # Computer Software clause at 52.227-7013.
 
 #Pick your machine type: AIX, AIX_CHPC, ICEBOX, SGI
-MACHINE = ILINUX
+MACHINE = ILINUX_beem
 #Pick you parallel type: <blank for none>, MPI, MPICH
-METHOD = 
+METHOD = DEBUG
+#METHOD = OPT
 #Define debug to turn on symbols and array checking: <blank for none>, TRUE
-DEBUG =      
-
+#DEBUG =      
+USEBLAS = YES
 #Set bogus default to check for unkown machine types
 F77 = ERROR_IN_THE_MAKEFILE
+METHOD = DOUBLE
+#METHOD = GAMMA 
+#METHOD = SCALAPACK
+# Do you want to do thermodynamic integration (NO,YES)?  If so 
+# # you'll need a compatible C compiler.
+CCOMPILE = NO
+# # Do you use TclMD option? (YES/NO)
+# # Note: you must have TclMD library installed and Tcl/Tk to use this.
+# # You can get Tcl/Tk from http://dev.scriptics.com/software/tcltk/
+TCLMD = NO
+#
+# # Choose a profiler - none, VAMPIR
+PROFILER = -pg
+#
+
 
 #Do we debug?
 ifneq (,$(findstring TRUE, ${DEBUG}))
@@ -46,16 +62,20 @@ ifneq (,$(findstring MPI, ${METHOD}))
 	MPIFILE = MPI_stuff.o
 endif
 
-include MACHINES/AIX
-include MACHINES/HUDSON
-include MACHINES/LINUX
-include MACHINES/ILINUX
-include MACHINES/MARYLOUX
-include MACHINES/SCRI
-include MACHINES/SGI
-include MACHINES/TRU64
 
-FFLAGS =  $(PARALLEL) $(OPTIMIZATION)
+#include MACHINES/AIX
+#include MACHINES/HUDSON
+#include MACHINES/LINUX
+#include MACHINES/ILINUX
+#include MACHINES/ILINUX_beem
+#include MACHINES/MARYLOUX
+#include MACHINES/SCRI
+#include MACHINES/SGI
+#include MACHINES/TRU64
+
+include MACHINES/${MACHINE}
+
+#FFLAGS =  $(PARALLEL) $(OPTIMIZATION)
 
 MODULES = precision.o coefficients.o constants.o dimensions.o quadrature.o \
 	  x_exact.o
@@ -68,8 +88,8 @@ EXX = clebsch_gordon.o factorial.o setup_clm.o x_1c.o xatom_2c.o \
 INTERPOLATERS = interpolate2d.o psiofr.o rprimeofr.o vnnaofr.o vppofr.o buildspline_1d.o \
 		dpsiofr.o
 
-INTEGRALS = onecenterxc.o onecenternuxc.o onecenternuxcs.o onecentervdip.o \
-        gaunt.o gauntReal.o mk_index.o \
+INTEGRALS = onecenterxc.o onecenternuxc.o onecenternuxcs.o onecentervdip.o radial_integral.o append_string.o \
+	gaunt.o gauntReal.o mk_index.o \
 	mk_indexPP.o mk_indexDipX.o mk_indexDipY.o rescaled_psi.o threecenter.o \
 	gleg.o  threecenter_integral.o twocenter.o twocenter_integral.o \
 	exc1crho.o nuxc1crho.o goverlap1c.o
@@ -92,7 +112,7 @@ OBJECTS = $(EXX) $(INTERPOLATERS) $(INTEGRALS) $(KINETIC) $(READFILES) $(XC) \
 	$(MAIN) $(MPIFILE) $(GAUSS)
 
 create.x: $(MODULES) $(OBJECTS) 
-	$(F90) $(FFLAGS) -o $@ $(MODULES) $(OBJECTS) $(LFLAGS)
+	$(F90) $(FFLAGS) -o $@ $(MODULES) $(FFLAGS) $(OBJECTS) $(LFLAGS) $(VISFLAGS) $(PARLFLAGS)
 
 create.o: create.f parameters.inc exchange.inc quadrature.inc \
 	wavefunctions.inc
@@ -217,6 +237,10 @@ gaunt.o : INTEGRALS/gaunt.f90 $(MODULES)
 	$(F90) $(FFLAGS) -c INTEGRALS/gaunt.f90
 onecentervdip.o : INTEGRALS/onecentervdip.f90 $(MODULES)
 	$(F90) $(FFLAGS) -c INTEGRALS/onecentervdip.f90
+radial_integral.o : INTEGRALS/radial_integral.f90 $(MODULES)
+	$(F90) $(FFLAGS) -c INTEGRALS/radial_integral.f90
+append_string.o : INTEGRALS/append_string.f90 $(MODULES)
+	$(F90) $(FFLAGS) -c INTEGRALS/append_string.f90
 onecenternuxc.o : INTEGRALS/onecenternuxc.f90 $(MODULES)
 	$(F90) $(FFLAGS) -c INTEGRALS/onecenternuxc.f90
 onecenternuxcs.o : INTEGRALS/onecenternuxcs.f90 $(MODULES)

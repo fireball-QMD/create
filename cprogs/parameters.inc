@@ -7,6 +7,7 @@
 ! maximum number of species (different atomtypes)
         integer nspec_max
         parameter (nspec_max = 20)
+        integer norb_max
  
 ! maximum number of shells 8 implies something like
 ! s, p, d, f, s*, p*, d*, and f* as one possibility
