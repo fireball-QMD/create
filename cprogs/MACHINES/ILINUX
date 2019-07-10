@@ -3,7 +3,7 @@ ifneq (,$(findstring ILINUX, ${MACHINE}))
 	F77 = ifort
 	F90 = ifort
 	PATH_MKL = ${MKLROOT}/lib/intel64/
-	PATH_FFTW_LIB = /usr/lib64/
+	PATH_FFTW_LIB = ${MKLROOT}/interfaces/fftw3xf/
 	PATH_FFTW_INCL = -I${MKLROOT}/include/fftw/
 	LFLAGS =  -Wl,--start-group  ${PATH_MKL}libmkl_intel_lp64.a ${PATH_MKL}libmkl_sequential.a ${PATH_MKL}libmkl_core.a -Wl,--end-group -lpthread -lm \
 		${PATH_FFTW_LIB}libfftw3xf_intel.a ${PATH_FFTW_INCL} -lm  ${PATH_MKL}libmkl_intel_lp64.a
