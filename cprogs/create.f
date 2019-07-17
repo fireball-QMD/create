@@ -142,6 +142,7 @@
         integer inuxc2c
         integer isnuxc1c
         integer isnuxc2c
+        integer V_intra_dip
  
 ! theory.input variables
         integer idogs
@@ -311,7 +312,7 @@
 ! for the switches which is dependent upon the the level of theory that
 ! is chosen.
         call readtheory (iammaster, ibcna, ibcxc, ikinetic, iswitch, 
-     1                   imuxc1c, inuxc1c, inuxc2c, isnuxc1c, isnuxc2c, 
+     1                   imuxc1c, inuxc1c, inuxc2c, isnuxc1c, isnuxc2c, V_intra_dip 
      2                   itest, idogs, iharris, ihubbard, ispin, 
      3                   ioomethod, ixc_opt, igauss, ngauss)
 
@@ -515,15 +516,13 @@
 !  =====>         4.5  Dipole???
 !
 ! **********************************************************************
-          !if (V_intra_dip .eq. 1) then
-         write(*,*) 'nspec= ',nspec !Ankais
+         if (V_intra_dip .eq. 1) then
           do itype = 1,nspec
           write(*,*) 'itype= ', itype !Ankais
           call onecentervdip (nsh_max, nspec, nspec_max, itype,
      1               nssh, lssh, drr_rho, rcutoffa_max, what, signature)
-
           end do !end do itype
-          !end if !end if (V_intra_dip .eq. 1) then 
+         end if !end if (V_intra_dip .eq. 1) then 
 ! ======================================================================
 ! Only do this on the master
          if (imuxc1c .eq. 1) then

@@ -72,7 +72,7 @@
 ! ===========================================================================
         subroutine readtheory (iammaster, ibcna, ibcxc, ikinetic, iswitch,   &
      &                         imuxc1c, inuxc1c, inuxc2c, isnuxc1c, isnuxc2c,&
-     &                         itest, idogs, iharris, ihubbard, ispin,       &
+     &                         V_intra_dip, itest, idogs, iharris, ihubbard, ispin,    &
      &                         ioomethod, ixc_opt, igauss, ngauss)
         implicit none
  
@@ -91,6 +91,7 @@
         integer, intent (out) :: inuxc2c
         integer, intent (out) :: isnuxc1c
         integer, intent (out) :: isnuxc2c
+        integer, intent (out) :: V_intra_dip
  
 ! two-center interactions
         integer, intent (out), dimension (0:11) :: iswitch 
@@ -266,6 +267,7 @@
          read (45,*) inuxc2c
          read (45,*) isnuxc1c
          read (45,*) isnuxc2c
+         read (45,*) V_intra_dip
          close (unit = 45)
         end if  
  

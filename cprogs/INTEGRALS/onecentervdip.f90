@@ -152,9 +152,9 @@
 
 
 ! Set up the header for the output file.
-        write (36,100)
-        write (36,*) ' All one center matrix elements created by:'
-        write (36,200) signature
+!        write (36,100)
+!        write (36,*) ' All one center matrix elements created by:'
+!        write (36,200) signature
 
       !  do itype = 1, nspec
       !   write (36,300) what(itype)
