@@ -18,6 +18,7 @@
 0                 inuxc2c           ! two-center extended hubbard
 0                 isnuxc1c          ! (spin) one-center extended hubbard
 0                 isnuxc2c          ! (spin) two-center extended hubbard
+0                 V_intra_dip       ! Intra-atomic dipolar potential
 !Note A: "1" means ON (This is usually the correct switch), "0" means off.
 !Note B: idipole_x, idipole_y
 !        Worry about following two cases later 
