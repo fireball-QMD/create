@@ -1,7 +1,7 @@
 rm timecreate
 echo ' Begin running create.com' >> timecreate
 date >> timecreate
-cat << EOF | ./create.x > output.log
+cat << EOF | ./cprogs/create.x > output.log
 pavel             
 0
 -99

@@ -312,7 +312,8 @@
 ! for the switches which is dependent upon the the level of theory that
 ! is chosen.
         call readtheory (iammaster, ibcna, ibcxc, ikinetic, iswitch, 
-     1                   imuxc1c, inuxc1c, inuxc2c, isnuxc1c, isnuxc2c, V_intra_dip 
+     1                   imuxc1c, inuxc1c, inuxc2c, isnuxc1c,
+     2                   isnuxc2c, V_intra_dip, 
      2                   itest, idogs, iharris, ihubbard, ispin, 
      3                   ioomethod, ixc_opt, igauss, ngauss)
 
