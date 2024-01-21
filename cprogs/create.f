@@ -535,7 +535,7 @@
           call onecenterxc (nspec, nspec_max, nsh_max, wfmax_points, 
      1                      iexc, fraction, nsshxc, lsshxc, 
      2                      rcutoffa_max, xnocc, dqorb, iderorb, what, 
-     3                      signature, drr_rho, dqint)
+     3                      signature, drr_rho,nzx)
 ! jel-X
           write (*,*) 'Call xc1rho ...'
           iexc_new = iexc
@@ -543,12 +543,12 @@
           call exc1crho (nspec, nspec_max, nsh_max, wfmax_points,
      1                        iexc_new, fraction, nsshxc, lsshxc, 
      2                        rcutoffa_max, xnocc, dqorb, iderorb, what,
-     3                        signature, drr_rho, dqint)
+     3                        signature, drr_rho, nzx)
 
           call nuxc1crho (nspec, nspec_max, nsh_max, wfmax_points,
      1                        iexc_new, fraction, nsshxc, lsshxc, 
      2                        rcutoffa_max, xnocc, dqorb, iderorb, what,
-     3                        signature, drr_rho, dqint)
+     3                        signature, drr_rho, nzx)
 ! end jel-X
          end if
  

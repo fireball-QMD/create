@@ -60,7 +60,7 @@
         subroutine exc1crho (nspec, nspec_max, nsh_max, wfmax_points,   &
      &                            iexc, fraction, nsshxc, lsshxc,       &
      &                            rcutoffa_max, xnocc, dqorb, iderorb,  &
-     &                            what, signature, drr_rho)
+     &                            what, signature, drr_rho,nzx)
         use constants
         implicit none
  
@@ -76,6 +76,7 @@
         integer, intent (in), dimension (nspec_max) :: iderorb
         integer, intent (in), dimension (nspec_max) :: nsshxc
 	integer, intent (in), dimension (nspec_max, nsh_max) :: lsshxc
+        integer, intent (in), dimension (nspec_max) :: nzx 
  
         real*8, intent (in) :: fraction
  
@@ -87,7 +88,6 @@
         character (len=70), intent (in) :: signature
 
         character (len=70), intent (in), dimension (nspec_max) :: what
- 
 ! Output
  
  
@@ -133,13 +133,13 @@
         real*8, external :: psiofr
 
         character(80) :: fname
+        character(80) ::  root
+        character(2) :: auxz
          
 ! Procedure
 ! ===========================================================================
 ! Create file name
-
         fname = 'coutput/exc1crho.dat'
-
 ! Open the file to store the onecenter data.
         write (*,*) ' open file ',fname
         open (unit = 36, file = fname , status = 'unknown')
@@ -152,6 +152,16 @@
 
         do in2 = 1, nspec
          write (36,300) what(in2)
+         write (auxz,'(i2.2)') nzx(in2)
+         root = 'coutput/exc1crho.'//auxz//'.dat'
+         open (unit = 360, file = root , status = 'unknown')
+         write (360,100)
+         write (360,*) ' All one center matrix elements '
+         write (360,*) ' created by: '
+         write (360,200) signature
+         write (360,300) what(in2)
+         write (360,100)
+         close(360)
         end do
         write (36,100)
 
@@ -186,6 +196,12 @@
          do lssh = 1,nsshxc(in1)
 
           write (36,400)  in1, nssh, lssh
+
+          write (auxz,'(i2.2)') nzx(in1)
+          root = 'coutput/exc1crho.'//auxz//'.dat'
+          open (unit = 360, file = root , access='append', status = 'old')
+          write (360,400)  in1, nssh, lssh
+          close(360)
  
 ! Integrals <i|exc(i)-mu(i)|i> and <i.nu|mu(i)|i.nu'>
 ! ***************************************************************************
@@ -232,11 +248,23 @@
           end do
           do issh = 1, nssh
            write (36,500) answer(issh,1:nssh)
+
+           write (auxz,'(i2.2)') nzx(in1)
+           root = 'coutput/exc1crho.'//auxz//'.dat'
+           open (unit = 360, file = root , access='append', status = 'old')
+           write (360,500) answer(issh,1:nssh)
+           close(360)
+
           end do ! do issh
           deallocate (answer)
          end do ! lssh 
          deallocate (xnocc_in)
         end do ! do in1 = 1, ispec
+
+        open (unit = 360, file = root , access='append', status = 'old')
+        write (360,*) '  '
+        close(360)
+
         write (36,*) '  '
         write (*,*) '  '
         write (*,*) ' Writing output to:  coutput/exc1crho.dat '

@@ -64,7 +64,7 @@
         subroutine onecenterxc (nspec, nspec_max, nsh_max, wfmax_points,     &
      &                          iexc, fraction, nsshxc, lsshxc, rcutoffa_max,&
      &                          xnocc, dqorb, iderorb, what, signature,      &
-     &                          drr_rho, dqint)
+     &                          drr_rho ,nzx )
         use constants
         implicit none
  
@@ -87,8 +87,8 @@
         real*8, intent (in), dimension (nspec_max) :: drr_rho
         real*8, intent (in), dimension (nspec_max) :: rcutoffa_max
         real*8, intent (in), dimension (nsh_max, nspec_max) :: xnocc
-        real*8, intent (in), dimension (nsh_max, nspec_max) :: dqint 
-
+        integer, intent (in), dimension (nspec_max) :: nzx
+        
         real tmp
 
         character (len=70) :: signature
@@ -150,6 +150,8 @@
         real*8 d2vxc(nsh_max,nsh_max,nsh_max,nsh_max)
         integer imask (nsh_max+1)
 
+        character(80) ::  root
+        character(2) :: auxz
  
 ! Procedure
 ! ===========================================================================
@@ -279,6 +281,18 @@
  
         do in1 = 1, nspec
          write (36,300) what(in1)
+
+         write (auxz,'(i2.2)') nzx(in1)
+         root = 'coutput/xc1c_dqi.'//auxz//'.dat'
+         open (unit = 360, file = root , status = 'unknown')
+         write (360,100)
+         write (360,*) ' All one center matrix elements '
+         write (360,*) ' created by: '
+         write (360,200) signature
+         write (360,300) what(in1)
+         write (360,100)
+         close(360)
+
         end do
         write (36,100)
 
@@ -288,7 +302,13 @@
 ! Loop over the species
         do in1 = 1, nspec
          nssh = nsshxc(in1)
+
          write (36,400) in1, nssh
+         write (auxz,'(i2.2)') nzx(in1)
+         root = 'coutput/xc1c_dqi.'//auxz//'.dat'
+         open (unit = 360, file = root , access='append', status = 'old')
+         write (360,400)  in1, nssh
+
          allocate (xnocc_in (nssh))
 
 ! Needed for charge corrections:
@@ -355,14 +375,20 @@
 ! Print exc terms
          do issh = 1, nssh
           write (36,501) (eexc(issh,jssh),jssh = 1, nssh)
+          write (360,501) (eexc(issh,jssh),jssh = 1, nssh)
          end do
+
          write (36,*)
+         write (360,*)
 ! Print vxc terms
          do issh = 1, nssh
           write (36,501) (vvxc(issh,jssh),jssh = 1, nssh)
+          write (360,501) (vvxc(issh,jssh),jssh = 1, nssh)
          end do
 
          deallocate (xnocc_in)
+        
+        close(360)
 
         end do ! do in1 = 1, nspec
 
