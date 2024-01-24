@@ -561,7 +561,7 @@
           call onecenternuxc (nspec, nspec_max, nsh_max, wfmax_points, 
      1                        iexc_new, fraction, nsshxc, rcutoffa_max, 
      2                        xnocc, dqorb, iderorb, what, signature, 
-     3                        drr_rho, dqint)
+     3                        drr_rho)
 ! jel-dq
          end if
 
