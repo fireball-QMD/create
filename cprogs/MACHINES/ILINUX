@@ -1,7 +1,7 @@
 #ILINUX
 ifneq (,$(findstring ILINUX, ${MACHINE}))
-	F77 = ifort
-	F90 = ifort
+	F77 = ifort -diag-disable=10448
+	F90 = ifort -diag-disable=10448
 	PATH_MKL = ${MKLROOT}/lib/intel64/
 	PATH_INCL = -I${MKLROOT}/include/
 	PATH_FFTW_LIB = ${MKLROOT}/interfaces/fftw3xf/
