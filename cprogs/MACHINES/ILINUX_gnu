@@ -1,8 +1,10 @@
 #ILINUX_gnu
 
+
 DIR=~/git
-PATH_FFTW_LIB = $DIR/fftw-3.3.10/
-PATH_BLAS = $DIR/lapack-3.12.0/
+PATH_FFTW_LIB=${DIR}/fftw-3.3.10/
+PATH_BLAS=${DIR}/lapack-3.12.0/
+
 
 ifneq (,$(findstring ILINUX_gnu, ${MACHINE}))
         F77 = gfortran
